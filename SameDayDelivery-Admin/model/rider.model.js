@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
 
 const riderModel = new mongoose.Schema({
-    rider_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        default:new mongoose.Types.ObjectId,
-    },
+
     rider_name: {
         type: String,
         required: true,

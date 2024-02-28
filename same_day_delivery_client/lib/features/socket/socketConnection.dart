@@ -14,10 +14,10 @@ class StreamSocket {
   }
 }
 
-StreamSocket streamSocket = StreamSocket();
+StreamSocket requestStreamSocket = StreamSocket();
 late IO.Socket socket;
 void socketInit() {
-  socket = IO.io('http://10.0.2.2:3000', <String, dynamic>{
+  socket = IO.io('http://localhost:3000', <String, dynamic>{
     "transports": ["websocket"],
     "autoConnect": false,
   });
@@ -26,8 +26,9 @@ void socketInit() {
     print('connected');
     socket.emit('msg', 'test');
   });
-  socket.on('request', (data) {
-    streamSocket.addResponse(data);
+  socket.emit('riderConnected', {"name": "Shaswat", "riderId": "12345"});
+  socket.on('bid', (data) {
+    requestStreamSocket.addResponse(data);
   });
   socket.onDisconnect((_) => print('disconnect'));
 }

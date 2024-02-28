@@ -3,6 +3,7 @@ import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
 import 'package:same_day_delivery_client/features/home/views/home_page.dart';
 import 'package:same_day_delivery_client/features/home/views/product_page.dart';
+import 'package:same_day_delivery_client/features/socket/biddingPage.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
 import 'package:same_day_delivery_client/features/socket/socketPage.dart';
 
@@ -36,7 +37,6 @@ class MyApp extends StatelessWidget {
           // This works for code too, not just values: Most code changes can be
           // tested with just a hot reload.
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
         ),
         home: SocketPage());
   }
