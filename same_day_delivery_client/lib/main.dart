@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
+import 'package:same_day_delivery_client/features/cart/views/cart_page.dart';
+import 'package:same_day_delivery_client/features/cart/views/checkout_page.dart';
 import 'package:same_day_delivery_client/features/home/views/home_page.dart';
 import 'package:same_day_delivery_client/features/home/views/product_page.dart';
 
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: CheckoutPage()
     );
   }
 }
