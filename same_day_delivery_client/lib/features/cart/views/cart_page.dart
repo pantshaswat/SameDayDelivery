@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/routes.dart';
 
 class CartPage extends StatelessWidget {
   CartPage({super.key});
@@ -40,19 +41,31 @@ class CartPage extends StatelessWidget {
       appBar: AppBar(
         title: CartPageAppBar(),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: ListView.separated(
-            separatorBuilder: (context, index) => Divider(),
-            itemCount: cartItems.length,
-            itemBuilder: (context, index) {
-              return ItemDetail(cartItem: cartItems[index]);
-            }),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: ListView.separated(
+                separatorBuilder: (context, index) => Divider(),
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  return ItemDetail(cartItem: cartItems[index]);
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 60,
+            child: Container(
+                height: 82,
+                color: Color.fromARGB(255, 240, 239, 239),
+                child: ItemsCheckout(cartItems: cartItems)),
+          )
+        ],
       ),
-      bottomNavigationBar: BottomAppBar(
-          surfaceTintColor: Colors.grey,
-          height: 82,
-          child: ItemsCheckout(cartItems: cartItems)),
     );
   }
 }
@@ -93,6 +106,13 @@ class CartPageAppBar extends StatelessWidget {
           ),
         ),
         Spacer(),
+        Text(
+          "Delete",
+          style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+              color: const Color.fromARGB(255, 162, 123, 6)),
+        ),
       ],
     );
   }
@@ -269,38 +289,45 @@ class _ItemsCheckoutState extends State<ItemsCheckout> {
         0,
         (sum, item) =>
             sum + (item['price'] as int) * (item['quantity'] as int));
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Delivery Price:Rs.$deliveryPrice",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: const Color.fromARGB(255, 150, 150, 150),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Delivery Price: Rs. $deliveryPrice",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: const Color.fromARGB(255, 150, 150, 150),
+                  ),
                 ),
-              ),
-              Text(
-                "Total Price:Rs.$totalPrice",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[800],
+                Text(
+                  "Total Price: Rs. $totalPrice",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[800],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          flex: 1,
-          child: CustomButton(text: 'Checkout', onPressed: () {}),
-        )
-      ],
+          Expanded(
+            flex: 1,
+            child: CustomButton(
+                text: 'Checkout',
+                onPressed: () {
+                  goRouter.go('/cart/checkout');
+                }),
+          )
+        ],
+      ),
     );
   }
 }

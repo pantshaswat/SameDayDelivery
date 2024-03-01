@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
@@ -72,7 +73,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     CustomButton(
                       text: 'Login',
-                      onPressed: () {},
+                      onPressed: () {GoRouter.of(context).go("/home");},
                     ),
                     const SizedBox(height: 20),
                     Row(
