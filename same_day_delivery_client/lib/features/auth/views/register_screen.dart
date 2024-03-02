@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
+import 'package:same_day_delivery_client/config/api.dart';
 import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
 
 class RegisterPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -13,6 +15,30 @@ class RegisterPage extends StatelessWidget {
   static const String imageURL =
       "https://toppng.com/uploads/preview/decorative-lines-vector-11549974585kzzlmrfrjk.png";
   RegisterPage({super.key});
+  void _registerUser(BuildContext context) async {
+    try {
+      UserModel userToRegister = UserModel(
+        userId:
+            DateTime.now().millisecondsSinceEpoch.toString(), //timeand date id
+
+        userName: nameController.text,
+        userEmail: emailController.text,
+        userPassword: passwordController.text,
+        userPhone: phoneController.text,
+        userAddress: addressController.text,
+        userDate: DateTime.now().toString(),
+      );
+
+      UserModel registeredUser = await ApiService.registerUser(userToRegister);
+
+      // Handle the registered user as needed (e.g., navigate to another screen)
+      print('User registered successfully: $registeredUser');
+    } catch (e) {
+      // Handle registration error
+      print('Error registering user: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,7 +124,11 @@ class RegisterPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     CustomButton(
                       text: "Register",
-                      onPressed: () {},
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          _registerUser(context);
+                        }
+                      },
                     ),
                     const SizedBox(height: 20),
                     Row(

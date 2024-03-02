@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
+import 'package:same_day_delivery_client/config/api.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
 
 class LoginPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   static const String imageURL =
       "https://toppng.com/uploads/preview/decorative-lines-vector-11549974585kzzlmrfrjk.png";
   LoginPage({super.key});
@@ -73,7 +75,21 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     CustomButton(
                       text: 'Login',
-                      onPressed: () {GoRouter.of(context).go("/home");},
+                      onPressed: () async {
+                        //use loginuser
+                        try {
+                          await ApiService.signInUser(
+                              nameController.text, passwordController.text);
+                        } catch (e) {
+//show snackbar
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                            ),
+                          );
+                        }
+                        GoRouter.of(context).go("/home");
+                      },
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -103,6 +119,8 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
+                            //use registeruser
+
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
