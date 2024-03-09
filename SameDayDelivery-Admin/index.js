@@ -1,14 +1,16 @@
 const Database  = require("./config/database");
 const app = require("./app");
-
-
+const http = require('node:http');
+const server = http.createServer(app);
+const initializeSocketIO = require('./services/socketService')
 const PORT = process.env.PORT || 3000;
 
+initializeSocketIO(server);
 
 (async () => {
     try {
       await Database.connect();
-      app.listen(PORT, () => {
+      server.listen(PORT, () => {
         console.log("Server is up on port " + PORT);
         console.log("http://localhost:" + PORT);
       });

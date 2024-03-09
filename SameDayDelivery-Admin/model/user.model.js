@@ -20,22 +20,11 @@ const userSchema = new Schema({
     trim: true,
   },
 
-  fullName: {
+  role: {
     type: String,
     required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    trim: true,
-  },
-  phoneNumber: {
-    type: [String],
-    trim: true,
+    enum: ["rider", "user", "shopkeeper"],
+    default: "user",
   },
 });
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:same_day_delivery_client/services/api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,6 +10,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +48,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: SingleChildScrollView(
-        child: const Column(
+        child: Column(
           children: [
             //Search Section
             SearchBar(),
@@ -49,7 +56,7 @@ class _HomePageState extends State<HomePage> {
             CategoriesSection(),
             //Product Section
             BestSellerSection(),
-            BestSellerSection(),
+            // BestSellerSection(),
           ],
         ),
       ),
@@ -139,111 +146,170 @@ class BestSellerSection extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: RefreshIndicator(
-                color: Colors.blue,
-                onRefresh: () {
-                  return Future.delayed(
-                    const Duration(seconds: 1),
-                    () {},
-                  );
-                },
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 25,
-                    childAspectRatio: .9,
-                  ),
-                  itemCount: 4,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      height: 200,
-                      width: 200,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
-                            child: Image(
-                              image: const NetworkImage(
-                                "https://backend.orbitvu.com/sites/default/files/image/sport-shoe-white-background.jpeg",
+              child: FutureBuilder(
+                  future: ApiService.getProducts(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        ApiService.getProducts();
+                      },
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 25,
+                          childAspectRatio: .9,
+                        ),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              GoRouter.of(context).push(
+                                  "/product/${snapshot.data![index].productId}",
+                                  extra: {
+                                    "product": snapshot.data![index],
+                                  });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.error);
-                              },
-                              width: double.infinity,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            "Best Seller",
-                            style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.blue[800],
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            "Product Name",
-                            style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Price",
-                                  style: TextStyle(
-                                    overflow: TextOverflow.ellipsis,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey[800],
-                                  ),
-                                ),
-                                const Spacer(),
-                                AspectRatio(
-                                  aspectRatio: 1,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: IconButton(
-                                      visualDensity:
-                                          VisualDensity.adaptivePlatformDensity,
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.favorite_border,
-                                        size: 15,
-                                      ),
+                              height: 200,
+                              width: 200,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: Image(
+                                      height: 120,
+                                      image: NetworkImage(
+                                          snapshot.data![index].productImage),
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                            height: 120,
+                                            color: Colors.grey[200],
+                                            child: const Center(
+                                                child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.error,
+                                                  color: Colors.red,
+                                                ),
+                                                Text(
+                                                  "Image Not Found",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            )));
+                                      },
+                                      width: double.infinity,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    "Best Seller",
+                                    style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.blue[800],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    snapshot.data![index].productName
+                                        .toString(),
+                                    style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Rs. ${snapshot.data![index].productPrice.toStringAsFixed(2)}",
+                                          style: TextStyle(
+                                            overflow: TextOverflow.ellipsis,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        const LoveButton(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     );
-                  },
-                ),
-              ),
+                  }),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class LoveButton extends StatefulWidget {
+  const LoveButton({
+    super.key,
+  });
+
+  @override
+  State<LoveButton> createState() => _LoveButtonState();
+}
+
+class _LoveButtonState extends State<LoveButton> {
+  bool isLoved = false;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: IconButton(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        onPressed: () {
+          setState(() {
+            isLoved = !isLoved;
+          });
+        },
+        icon: Icon(
+          isLoved ? Icons.favorite : Icons.favorite_border,
+          color: isLoved ? Colors.red : Colors.grey[800],
+          size: 15,
         ),
       ),
     );

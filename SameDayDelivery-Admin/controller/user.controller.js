@@ -20,6 +20,7 @@ exports.register = async (req, res) => {
     password: md5Password,
     fullName: body.fullName,
     phoneNumber: body.phoneNumber ?? "",
+    role: body.role ?? "user",
   });
   return res.status(201).send(user);
 };
@@ -28,33 +29,47 @@ exports.signIn = async (req, res) => {
   const { email, password } = req.body;
 
   if (!(email && password)) {
-    return res.status(400).send("All input are required");
+    console.log("All input is required");
+    return res.status(400).send({
+      message: "All input is required",
+    });
   }
 
   const user = await userModel.findOne({ email });
   if (!user) {
-    return res.status(404).send("User not found");
+    console.log("User not found");
+    return res.status(404).send({
+      message: "User not found",
+    });
   }
 
   const password_check = md5(password) === user.password;
 
   if (!password_check) {
-    return res.status(400).send("Invalid Credentialsss");
+    console.log("Invalid credentials");
+    return res.status(400).send({
+      message: "Invalid credentials",
+    });
   }
 
   const token = createJwt(user);
-  console.log(token);
+
   return res
     .status(201)
     .cookie("token", token, {
       expires: new Date(Date.now() + 25892000000),
       httpOnly: false,
     })
-    .send("Logged in successfully");
+    .send({
+      success: true,
+      message: "Logged in successfully",
+    });
 };
 exports.signOut = async (req, res) => {
-  return res.status(201).clearCookie("token").send("logged out");
+  return res.status(201).clearCookie("token").send({
+    message: "Logged out successfully",
+  });
 };
 
-exports.updateUser = async (req, res) => {};
-exports.deleteUser = async (req, res) => {};
+exports.updateUser = async (req, res) => { };
+exports.deleteUser = async (req, res) => { };

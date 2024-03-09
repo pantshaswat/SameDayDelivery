@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
-import 'package:same_day_delivery_client/config/api.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
+import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/api.dart';
 
 class LoginPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -74,21 +76,41 @@ class LoginPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
-                      text: 'Login',
+                      text: Text(
+                        'Login',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
                       onPressed: () async {
                         //use loginuser
                         try {
-                          await ApiService.signInUser(
+                          final response = await ApiService.signInUser(
                               nameController.text, passwordController.text);
+                          if (response["success"] == true) {
+                            goRouter.goNamed("home");
+                            showCustomSnackBar(
+                              context,
+                              message: response["message"],
+                              color: Colors.green,
+                              headingText: "Success!",
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(response["message"]),
+                              ),
+                            );
+                          }
                         } catch (e) {
-//show snackbar
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(e.toString()),
                             ),
                           );
+                          return;
                         }
-                        GoRouter.of(context).go("/home");
                       },
                     ),
                     const SizedBox(height: 20),
@@ -121,7 +143,7 @@ class LoginPage extends StatelessWidget {
                           onTap: () {
                             //use registeruser
 
-                            Navigator.pushReplacement(
+                            Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => RegisterPage(),
