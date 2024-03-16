@@ -1,15 +1,21 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
-import 'package:same_day_delivery_client/features/home/views/home_page.dart';
+import 'package:same_day_delivery_client/components/location_selector.dart';
+import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/location.dart';
 
 class CheckoutPage extends StatefulWidget {
-  CheckoutPage({super.key});
+  const CheckoutPage({super.key});
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
+  GeoPoint? pickedLocation;
   final List<Map<String, dynamic>> checkOutItems = [
     {
       "productName": "Running Shoes",
@@ -45,7 +51,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: Column(
           children: [
             OrderSummary(checkedItems: checkOutItems),
-            DeliveryPlace(),
+            DeliveryPlace(
+              pickedLocation: pickedLocation,
+              onLocationSelected: (p0) {
+                setState(() {
+                  pickedLocation = p0;
+                });
+              },
+            ),
             PaymentMethod(
                 selectedPaymentMethod: selectedPaymentMethod,
                 onPaymentMethodSelected: (String paymentMethod) {
@@ -53,15 +66,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     selectedPaymentMethod = paymentMethod;
                   });
                 }),
-            PayementDetail(),
+            const PayementDetail(),
             Container(
                 height: 82,
-                color: Color.fromARGB(255, 240, 239, 239),
-                child: PlaceOrder())
+                color: const Color.fromARGB(255, 240, 239, 239),
+                child: PlaceOrder(
+                  pickedLocation: pickedLocation,
+                ))
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: const BottomAppBar(
         height: 62,
       ),
     );
@@ -89,21 +104,21 @@ class OrderSummary extends StatelessWidget {
             ),
           ),
         ),
-        Divider(
+        const Divider(
           thickness: 3,
           indent: 20,
           endIndent: 200,
         ),
         ListView.separated(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return ItemDetail(
               item: checkedItems[index],
             );
           },
           separatorBuilder: (context, index) {
-            return Divider();
+            return const Divider();
           },
           itemCount: checkedItems.length,
         ),
@@ -120,7 +135,7 @@ class ItemDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         height: 110,
@@ -130,7 +145,7 @@ class ItemDetail extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image(
+              child: const Image(
                 width: 130,
                 image: NetworkImage(
                   "https://cdn.thewirecutter.com/wp-content/media/2021/02/whitesneakers-2048px-4187.jpg",
@@ -138,7 +153,7 @@ class ItemDetail extends StatelessWidget {
                 fit: BoxFit.fill,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 10,
             ),
             Column(
@@ -156,13 +171,13 @@ class ItemDetail extends StatelessWidget {
                 ),
                 Text(
                   item['shopName'],
-                  style: TextStyle(
+                  style: const TextStyle(
                     overflow: TextOverflow.ellipsis,
                     fontSize: 10,
-                    color: const Color.fromARGB(255, 150, 150, 150),
+                    color: Color.fromARGB(255, 150, 150, 150),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Row(
@@ -175,15 +190,15 @@ class ItemDetail extends StatelessWidget {
                         color: Colors.grey[800],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 100,
                     ),
                     Text(
                       "Qty:${item['quantity']}",
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(255, 150, 150, 150),
+                        color: Color.fromARGB(255, 150, 150, 150),
                       ),
                     ),
                   ],
@@ -197,9 +212,17 @@ class ItemDetail extends StatelessWidget {
   }
 }
 
-class DeliveryPlace extends StatelessWidget {
-  const DeliveryPlace({super.key});
+class DeliveryPlace extends StatefulWidget {
+  final Function(GeoPoint) onLocationSelected;
+  GeoPoint? pickedLocation;
+  DeliveryPlace(
+      {super.key, this.pickedLocation, required this.onLocationSelected});
 
+  @override
+  State<DeliveryPlace> createState() => _DeliveryPlaceState();
+}
+
+class _DeliveryPlaceState extends State<DeliveryPlace> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -216,7 +239,7 @@ class DeliveryPlace extends StatelessWidget {
             ),
           ),
         ),
-        Divider(
+        const Divider(
           thickness: 3,
           indent: 20,
           endIndent: 200,
@@ -225,14 +248,15 @@ class DeliveryPlace extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Row(
             children: [
-              Image(
-                width: 160,
-                image: NetworkImage(
-                  "https://joomly.net/frontend/web/images/googlemap/map.png",
-                ),
-                fit: BoxFit.fill,
+              LocationSelector(
+                onLocationSelected: (p0) {
+                  setState(() {
+                    widget.pickedLocation = p0;
+                    widget.onLocationSelected(p0);
+                  });
+                },
               ),
-              SizedBox(
+              const SizedBox(
                 width: 15,
               ),
               Column(
@@ -246,31 +270,74 @@ class DeliveryPlace extends StatelessWidget {
                       color: Colors.grey[800],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
-                  Text(
+                  const Text(
                     'Contact:9865374628',
                     style: TextStyle(
                       fontSize: 13,
                       color: Color.fromARGB(255, 116, 116, 116),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
-                  Text(
-                    "Address : Dhulikhel ,KU",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color.fromARGB(255, 116, 116, 116),
-                    ),
-                  ),
+                  widget.pickedLocation == null
+                      ? const Text(
+                          "Select delivery location",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color.fromARGB(255, 116, 116, 116),
+                          ),
+                        )
+                      : FutureBuilder(
+                          future: LocationService()
+                              .getPlaceName(widget.pickedLocation!),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text(
+                                "Loading location...",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color.fromARGB(255, 116, 116, 116),
+                                ),
+                              );
+                            }
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  snapshot.data!.name!,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color.fromARGB(255, 116, 116, 116),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                snapshot.data!.locality! == null
+                                    ? const SizedBox()
+                                    : Text(
+                                        "${snapshot.data!.locality!}, ${snapshot.data!.country!}",
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Color.fromARGB(
+                                              255, 116, 116, 116),
+                                        ),
+                                      ),
+                              ],
+                            );
+                          },
+                        ),
                 ],
               )
             ],
           ),
-        )
+        ),
       ],
     );
   }
@@ -310,7 +377,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ),
           ),
         ),
-        Divider(
+        const Divider(
           thickness: 3,
           indent: 20,
           endIndent: 200,
@@ -325,11 +392,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(children: [
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
-              Icon(Icons.money),
-              SizedBox(
+              const Icon(Icons.money),
+              const SizedBox(
                 width: 10,
               ),
               Text(
@@ -340,7 +407,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                   color: Colors.grey[800],
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Checkbox(
                 activeColor: MaterialStateColor.resolveWith(
                   (states) => Colors.grey,
@@ -372,11 +439,11 @@ class _PaymentMethodState extends State<PaymentMethod> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(children: [
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
-              Icon(Icons.web),
-              SizedBox(
+              const Icon(Icons.web),
+              const SizedBox(
                 width: 10,
               ),
               Text(
@@ -387,7 +454,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                   color: Colors.grey[800],
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Checkbox(
                 activeColor: MaterialStateColor.resolveWith(
                   (states) => Colors.grey,
@@ -424,11 +491,11 @@ class PayementDetail extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
-          color: Color.fromARGB(255, 243, 241, 241),
+          color: const Color.fromARGB(255, 243, 241, 241),
         ),
         width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
               PriceList(detail: "Delivery Fee", price: '65'),
@@ -456,14 +523,14 @@ class PriceList extends StatelessWidget {
       children: [
         Text(
           detail,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             color: Color.fromARGB(255, 116, 116, 116),
           ),
         ),
         Text(
           price,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             color: Color.fromARGB(255, 116, 116, 116),
           ),
@@ -474,19 +541,21 @@ class PriceList extends StatelessWidget {
 }
 
 class PlaceOrder extends StatefulWidget {
-  const PlaceOrder({super.key});
+  GeoPoint? pickedLocation;
+
+  PlaceOrder({
+    super.key,
+    required this.pickedLocation,
+  });
 
   @override
   State<PlaceOrder> createState() => _PlaceOrderState();
 }
 
 class _PlaceOrderState extends State<PlaceOrder> {
-  late bool orderPlaced;
-
   @override
   void initState() {
     super.initState();
-    orderPlaced = false;
   }
 
   @override
@@ -516,54 +585,31 @@ class _PlaceOrderState extends State<PlaceOrder> {
           Expanded(
             flex: 1,
             child: CustomButton(
-              text: orderPlaced ? 'Continue' : 'Place Order',
-              onPressed: () {
-                if (orderPlaced) {
-                  //continue to next screen
-                } else {
-                  showBottomSheet(
-                    context: context, 
-                    builder:(context){
-                      return GestureDetector(
-                        onTap: (){
-                          setState(() {
-                            orderPlaced=true;
-                            Navigator.of(context).pop();
-                          });
-                        },
-                        child: Container(
-                          color: Color.fromARGB(255, 240, 239, 239),
-                          height: 100,
-                          width: double.infinity,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image(
-                                  width: 25,
-                                  image: NetworkImage(
-                                    "https://cdn-icons-png.freepik.com/512/190/190411.png",
-                                  ),
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Text(
-                                "Your order has been placed",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.grey[800],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    });
-                }
-              },
-            ),
+                onPressed: () async {
+                  final currentPosition = await LocationService().getLocation();
+                  if (widget.pickedLocation == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please select delivery location"),
+                      ),
+                    );
+                    return;
+                  }
+                  goRouter.push("/cart/riderPage", extra: {
+                    "endpoint": widget.pickedLocation,
+                    "startingPoint": GeoPoint(
+                      latitude: currentPosition.latitude,
+                      longitude: currentPosition.longitude,
+                    )
+                  });
+                },
+                text: Text(
+                  "Place Order",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                )),
           ),
         ],
       ),

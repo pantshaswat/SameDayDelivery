@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class ProductModel {
   String productId;
   String sellerId;
@@ -5,7 +7,7 @@ class ProductModel {
   num productPrice;
   String productImage;
   String productDescription;
-  DateTime productDate;
+  String productDate;
 
   ProductModel({
     required this.productId,
@@ -19,7 +21,7 @@ class ProductModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'product_id': productId,
+      '_id': productId,
       'seller_id': sellerId,
       'product_name': productName,
       'product_price': productPrice,
@@ -31,13 +33,38 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      productId: json['product_id'],
+      productId: json['_id'],
       sellerId: json['seller_id'],
       productName: json['product_name'],
       productPrice: json['product_price'],
       productImage: json['product_image'],
       productDescription: json['product_description'],
       productDate: json['product_date'],
+    );
+  }
+
+  String toJsonString() {
+    return ("""{
+      "productID": "$productId",
+      "sellerID": "$sellerId",
+      "productName": "$productName",
+      "productPrice": $productPrice,
+      "productImage": "$productImage",
+      "productDescription": "$productDescription",
+      "productDate": "$productDate"
+    }""");
+  }
+
+  factory ProductModel.fromJsonString(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+    return ProductModel(
+      productId: json['productID'],
+      sellerId: json['sellerID'],
+      productName: json['productName'],
+      productPrice: json['productPrice'],
+      productImage: json['productImage'],
+      productDescription: json['productDescription'],
+      productDate: json['productDate'],
     );
   }
 }

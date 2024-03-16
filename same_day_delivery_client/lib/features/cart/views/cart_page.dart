@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/model/cart.item.model.dart';
+import 'package:same_day_delivery_client/model/product.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
   final List<Map<String, dynamic>> cartItems = [
     {
       "productName": "Running Shoes",
@@ -39,29 +49,56 @@ class CartPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: CartPageAppBar(),
+        title: const CartPageAppBar(),
       ),
       body: Stack(
         children: [
           Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(),
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  return ItemDetail(cartItem: cartItems[index]);
-                },
-              ),
+              child: Expanded(
+            child: FutureBuilder(
+              future: LocalStorage.getCartItems(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<ProductModel>?> snapshot) {
+                if (snapshot.hasData) {
+                  return RefreshIndicator(
+                      onRefresh: () async {
+                        setState(() {});
+                      },
+                      child: ListView.builder(
+                          cacheExtent: snapshot.data!.length.toDouble(),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return ItemDetail(
+                              cartItem: CartItem.fromProductModel(
+                                  snapshot.data![index]),
+                            );
+                          }));
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
             ),
-          ),
+          )),
+          // Positioned.fill(
+          //   child: Padding(
+          //     padding: const EdgeInsets.symmetric(vertical: 10),
+          //     child: ListView.separated(
+          //       separatorBuilder: (context, index) => const Divider(),
+          //       itemCount: cartItems.length,
+          //       itemBuilder: (context, index) {
+          //         return ItemDetail(cartItem: cartItems[index]);
+          //       },
+          //     ),
+          //   ),
+          // ),
           Positioned(
             left: 0,
             right: 0,
-            bottom: 60,
+            bottom: 100,
             child: Container(
                 height: 82,
-                color: Color.fromARGB(255, 240, 239, 239),
+                color: const Color.fromARGB(255, 240, 239, 239),
                 child: ItemsCheckout(cartItems: cartItems)),
           )
         ],
@@ -96,7 +133,7 @@ class CartPageAppBar extends StatelessWidget {
                 ),
               )),
         ),
-        Spacer(),
+        const Spacer(),
         Text(
           "Cart",
           style: TextStyle(
@@ -105,13 +142,13 @@ class CartPageAppBar extends StatelessWidget {
             color: Colors.grey[800],
           ),
         ),
-        Spacer(),
-        Text(
+        const Spacer(),
+        const Text(
           "Delete",
           style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w400,
-              color: const Color.fromARGB(255, 162, 123, 6)),
+              color: Color.fromARGB(255, 162, 123, 6)),
         ),
       ],
     );
@@ -119,7 +156,7 @@ class CartPageAppBar extends StatelessWidget {
 }
 
 class ItemDetail extends StatefulWidget {
-  final Map<String, dynamic> cartItem;
+  final CartItem cartItem;
 
   const ItemDetail({Key? key, required this.cartItem}) : super(key: key);
 
@@ -134,16 +171,16 @@ class _ItemCountState extends State<ItemDetail> {
   @override
   void initState() {
     super.initState();
-    quantity = widget.cartItem['quantity'];
-    isChecked = widget.cartItem['isChecked'];
+    quantity = widget.cartItem.quantity;
+    isChecked = widget.cartItem.isChecked;
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> cartItem = widget.cartItem;
+    CartItem cartItem = widget.cartItem;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         height: 120,
@@ -163,7 +200,7 @@ class _ItemCountState extends State<ItemDetail> {
             ),
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image(
+              child: const Image(
                 width: 130,
                 image: NetworkImage(
                   "https://cdn.thewirecutter.com/wp-content/media/2021/02/whitesneakers-2048px-4187.jpg",
@@ -171,7 +208,7 @@ class _ItemCountState extends State<ItemDetail> {
                 fit: BoxFit.fill,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 10,
             ),
             Column(
@@ -179,7 +216,7 @@ class _ItemCountState extends State<ItemDetail> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  cartItem['productName'],
+                  cartItem.title,
                   style: TextStyle(
                     overflow: TextOverflow.ellipsis,
                     fontSize: 16,
@@ -188,32 +225,32 @@ class _ItemCountState extends State<ItemDetail> {
                   ),
                 ),
                 Text(
-                  cartItem['shopName'],
-                  style: TextStyle(
+                  DateFormat.yMMMd().format(DateTime.parse(cartItem.addedDate)),
+                  style: const TextStyle(
                     overflow: TextOverflow.ellipsis,
                     fontSize: 10,
-                    color: const Color.fromARGB(255, 150, 150, 150),
+                    color: Color.fromARGB(255, 150, 150, 150),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Price:Rs. ${cartItem['price']}",
+                      "Price:Rs. ${cartItem.price}",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey[800],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 25,
                     ),
                     Container(
-                      padding: EdgeInsets.all(3),
+                      padding: const EdgeInsets.all(3),
                       width: 70,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
@@ -229,7 +266,7 @@ class _ItemCountState extends State<ItemDetail> {
                                 });
                               }
                             },
-                            child: Icon(
+                            child: const Icon(
                               Icons.remove,
                               size: 13,
                               color: Colors.grey,
@@ -237,7 +274,7 @@ class _ItemCountState extends State<ItemDetail> {
                           ),
                           Text(
                             '$quantity',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               color: Colors.grey,
                             ),
@@ -248,7 +285,7 @@ class _ItemCountState extends State<ItemDetail> {
                                 quantity++;
                               });
                             },
-                            child: Icon(
+                            child: const Icon(
                               Icons.add,
                               size: 13,
                               color: Colors.grey,
@@ -282,7 +319,6 @@ class _ItemsCheckoutState extends State<ItemsCheckout> {
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> checkedItems =
         widget.cartItems.where((item) => item['isChecked'] == true).toList();
-    print(checkedItems);
 
     int deliveryPrice = 65;
     int totalPrice = checkedItems.fold<int>(
@@ -302,9 +338,9 @@ class _ItemsCheckoutState extends State<ItemsCheckout> {
               children: [
                 Text(
                   "Delivery Price: Rs. $deliveryPrice",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: const Color.fromARGB(255, 150, 150, 150),
+                    color: Color.fromARGB(255, 150, 150, 150),
                   ),
                 ),
                 Text(
@@ -321,7 +357,14 @@ class _ItemsCheckoutState extends State<ItemsCheckout> {
           Expanded(
             flex: 1,
             child: CustomButton(
-                text: 'Checkout',
+                text: const Text(
+                  "Checkout",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 onPressed: () {
                   goRouter.go('/cart/checkout');
                 }),

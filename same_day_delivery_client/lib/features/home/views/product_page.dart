@@ -1,37 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/model/product.model.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({super.key});
+  final ProductModel product;
+  const ProductPage({
+    required this.product,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const ProductPageAppBar(),
+        leadingWidth: 80,
+        leading: Padding(
+          padding: const EdgeInsets.only(
+            left: 20.0,
+          ),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.only(left: 5),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    size: 15,
+                  ),
+                )),
+          ),
+        ),
+        title: ProductPageAppBar(product: product),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ProductTitle(),
-              RatingSection(),
-              SizedBox(
-                height: 10,
+              ProductTitle(
+                product: product,
               ),
-              CategorySection(),
+              CategorySection(
+                product: product,
+              ),
               //Category
               //Price
-              PriceSection(),
+              PriceSection(
+                product: product,
+              ),
               //Image
-              ImageSection(),
+              ImageSection(
+                product: product,
+              ),
               //Description
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
-              DescriptionSection(),
+              DescriptionSection(
+                product: product,
+              ),
               //spacer
               // Spacer(),
               //Action Button
@@ -50,18 +88,28 @@ class ProductPage extends StatelessWidget {
             Expanded(
               flex: 1, // smaller size
               child: CustomButton(
-                onPressed: () {},
-                text: "Cart",
-              ),
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            Expanded(
-              flex: 2, // larger size
-              child: CustomButton(
-                onPressed: () {},
-                text: 'Buy Now',
+                onPressed: () async {
+                  await LocalStorage.saveCartitems(cartItems: [product]);
+                },
+                text: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Add to Cart",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Icon(
+                      Icons.shopping_cart_checkout,
+                      size: 30,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -72,22 +120,51 @@ class ProductPage extends StatelessWidget {
 }
 
 class ImageSection extends StatelessWidget {
+  final ProductModel product;
   const ImageSection({
+    required this.product,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 250,
       width: double.infinity,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Image(
           image: NetworkImage(
-            "https://cdn.thewirecutter.com/wp-content/media/2021/02/whitesneakers-2048px-4187.jpg",
+            product.productImage,
           ),
           fit: BoxFit.fill,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                  Text(
+                    "Image Not Found",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              )),
+            );
+          },
           loadingBuilder: (BuildContext context, Widget child,
               ImageChunkEvent? loadingProgress) {
             if (loadingProgress == null) {
@@ -110,8 +187,10 @@ class ImageSection extends StatelessWidget {
 }
 
 class DescriptionSection extends StatelessWidget {
+  final ProductModel product;
   const DescriptionSection({
     super.key,
+    required this.product,
   });
 
   @override
@@ -122,7 +201,7 @@ class DescriptionSection extends StatelessWidget {
       child: Stack(
         children: [
           Text(
-            "lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur  commodo consequat. Duis aute irure dolor ",
+            product.productDescription,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -142,8 +221,10 @@ class DescriptionSection extends StatelessWidget {
                       return Container(
                         height: 200,
                         color: Colors.grey[200],
-                        child: const Center(
-                          child: Text("Description"),
+                        child: Center(
+                          child: Text(
+                            product.productDescription,
+                          ),
                         ),
                       );
                     });
@@ -177,8 +258,10 @@ class DescriptionSection extends StatelessWidget {
 }
 
 class PriceSection extends StatelessWidget {
+  final ProductModel product;
   const PriceSection({
     super.key,
+    required this.product,
   });
 
   @override
@@ -187,7 +270,7 @@ class PriceSection extends StatelessWidget {
       height: 40,
       width: double.infinity,
       child: Text(
-        "\$ 100.50",
+        "Rs. ${product.productPrice.toStringAsFixed(2)}",
         style: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
@@ -199,8 +282,10 @@ class PriceSection extends StatelessWidget {
 }
 
 class CategorySection extends StatelessWidget {
+  final ProductModel product;
   const CategorySection({
     super.key,
+    required this.product,
   });
 
   @override
@@ -209,7 +294,7 @@ class CategorySection extends StatelessWidget {
       height: 25,
       width: 200,
       child: Text(
-        "Men's Shoes",
+        DateFormat.yMMMd().format(DateTime.parse(product.productDate)),
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
@@ -237,8 +322,10 @@ class RatingSection extends StatelessWidget {
 }
 
 class ProductTitle extends StatelessWidget {
+  final ProductModel product;
   const ProductTitle({
     super.key,
+    required this.product,
   });
 
   @override
@@ -247,7 +334,7 @@ class ProductTitle extends StatelessWidget {
       height: 75,
       width: 180,
       child: Text(
-        "New Balance Shoes Essential",
+        product.productName,
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -259,43 +346,25 @@ class ProductTitle extends StatelessWidget {
 }
 
 class ProductPageAppBar extends StatelessWidget {
+  final ProductModel product;
   const ProductPageAppBar({
     super.key,
+    required this.product,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 5),
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  size: 15,
-                ),
-              )),
-        ),
-        Spacer(),
         Text(
-          "Shop Name",
+          product.productName,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.grey[800],
           ),
         ),
-        Spacer(),
+        const Spacer(),
         Icon(
           Icons.shopping_bag,
           size: 25,

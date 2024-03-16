@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
-  final String text;
+  final dynamic text;
   final VoidCallback onPressed;
   const CustomButton({
     required this.text,
@@ -14,7 +14,7 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: TextButton(
-        onPressed:onPressed,
+        onPressed: onPressed,
         style: ButtonStyle(
           foregroundColor: MaterialStateColor.resolveWith(
             (states) => Colors.white,
@@ -30,7 +30,7 @@ class CustomButton extends StatelessWidget {
             ),
           ),
         ),
-        child: Text(text),
+        child: text,
       ),
     );
   }

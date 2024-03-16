@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
-import 'package:same_day_delivery_client/config/api.dart';
 import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
+import 'package:same_day_delivery_client/services/api.dart';
 
 class RegisterPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -123,7 +123,13 @@ class RegisterPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
-                      text: "Register",
+                      text: const Text(
+                        'Register',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
                           _registerUser(context);
