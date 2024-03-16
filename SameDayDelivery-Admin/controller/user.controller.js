@@ -56,5 +56,43 @@ exports.signOut = async (req, res) => {
   return res.status(201).clearCookie("token").send("logged out");
 };
 
-exports.updateUser = async (req, res) => {};
-exports.deleteUser = async (req, res) => {};
+exports.updateUser = async (req, res) => {
+  const { email, password, fullName, phoneNumber } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user properties if provided in the request body
+    if (password) user.password = password;
+    if (fullName) user.fullName = fullName;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+
+    await user.save();
+
+    return res.status(200).json({ message: "User updated successfully", user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOneAndDelete({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully", user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
