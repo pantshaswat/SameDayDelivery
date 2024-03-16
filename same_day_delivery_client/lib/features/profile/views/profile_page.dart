@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -28,58 +30,52 @@ class ProfileSection extends StatelessWidget {
       width: double.infinity,
       color: Color.fromARGB(255, 240, 239, 239),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Stack(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
+        child: Row(
           children: [
-            Positioned(
-              left: 10,
-              top: 70,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(200),
-                  child: Image(
-                    height: 100,
-                    width: 100,
-                    image: NetworkImage(
-                        "https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg"),
-                    fit: BoxFit.cover,
-                  )),
-            ),
-            Positioned(
-              top: 93,
-              right: 83,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Person name",
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[800],
-                    ),
+            // Positioned(
+            //   left: 10,
+            //   top: 70,
+            //   child: ClipRRect(
+            //       borderRadius: BorderRadius.circular(200),
+            //       child: Image(
+            //         height: 100,
+            //         width: 100,
+            //         image: NetworkImage(
+            //             "https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg"),
+            //         fit: BoxFit.cover,
+            //       )),
+            // ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Person name",
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[800],
                   ),
-                  Text(
-                    "example@gmail.com",
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(255, 82, 82, 82),
-                    ),
+                ),
+                Text(
+                  "example@gmail.com",
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color.fromARGB(255, 82, 82, 82),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Positioned(
-                top: 55,
-                right: 20,
-                child: Icon(
-                  Icons.settings,
-                  size: 28,
-                  color: const Color.fromARGB(255, 113, 113, 113),
-                ))
+            Spacer(),
+            Icon(
+              Icons.settings,
+              size: 28,
+              color: const Color.fromARGB(255, 113, 113, 113),
+            )
           ],
         ),
       ),
@@ -136,9 +132,7 @@ class MyOrder extends StatelessWidget {
                   width: 17,
                 ),
                 OrderStatus(
-                    icon: Icons.file_copy,
-                    label: 'Preorder',
-                    onPressed: () {})
+                    icon: Icons.file_copy, label: 'Preorder', onPressed: () {})
               ],
             ),
           )
@@ -171,7 +165,9 @@ class OrderStatus extends StatelessWidget {
             size: 28,
             color: Color.fromARGB(255, 82, 82, 82),
           ),
-          SizedBox(height: 8,),
+          SizedBox(
+            height: 8,
+          ),
           Text(label)
         ],
       ),
@@ -179,14 +175,29 @@ class OrderStatus extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class Services extends StatelessWidget {
   Services({super.key});
 
   List<Map<String, dynamic>> services = [
-    {"icon": Icons.folder, "label": "Browsing History", "onPressed": () {}},
-    {"icon": Icons.location_on, "label": "Address", "onPressed": () {}},
-    {"icon": Icons.support_agent_outlined, "label": "Support", "onPressed": () {}},
-    {"icon": Icons.info, "label": "About Us", "onPressed": () {}}
+    // {"icon": Icons.folder, "label": "Browsing History", "onPressed": () {}},
+    // {"icon": Icons.location_on, "label": "Address", "onPressed": () {}},
+    // {
+    //   "icon": Icons.support_agent_outlined,
+    //   "label": "Support",
+    //   "onPressed": () {}
+    // },
+    // {"icon": Icons.info, "label": "About Us", "onPressed": () {}},
+    {
+      "icon": Icons.logout,
+      "label": "Logout",
+      "onPressed": () async {
+        await LocalStorage.removeToken();
+        await LocalStorage.removeUser();
+        goRouter.refresh();
+        goRouter.go('/login');
+      }
+    },
   ];
   @override
   Widget build(BuildContext context) {

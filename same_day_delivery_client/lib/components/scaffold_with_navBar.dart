@@ -6,12 +6,17 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   ScaffoldWithBottomNavBar({super.key, required this.navigationShell});
-  final labels = ['Home', 'Cart', 'Messages', 'Profile'];
+  final labels = [
+    'Home',
+    'Cart',
+    'Profile',
+    // 'Messages',
+  ];
   final icons = [
     Icons.home,
     Icons.shopping_bag,
-    Icons.chat,
     Icons.person_outline
+    // Icons.chat,
   ];
 
   @override

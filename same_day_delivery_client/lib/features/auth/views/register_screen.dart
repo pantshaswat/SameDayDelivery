@@ -1,44 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
 import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/services/api.dart';
 
-class RegisterPage extends StatelessWidget {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
+class RegisterPage extends StatefulWidget {
   static const String imageURL =
       "https://toppng.com/uploads/preview/decorative-lines-vector-11549974585kzzlmrfrjk.png";
-  RegisterPage({super.key});
-  void _registerUser(BuildContext context) async {
-    try {
-      UserModel userToRegister = UserModel(
-        userId:
-            DateTime.now().millisecondsSinceEpoch.toString(), //timeand date id
+  const RegisterPage({super.key});
 
-        userName: nameController.text,
-        userEmail: emailController.text,
-        userPassword: passwordController.text,
-        userPhone: phoneController.text,
-        userAddress: addressController.text,
-        userDate: DateTime.now().toString(),
-      );
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
 
-      UserModel registeredUser = await ApiService.registerUser(userToRegister);
+class _RegisterPageState extends State<RegisterPage> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-      // Handle the registered user as needed (e.g., navigate to another screen)
-      print('User registered successfully: $registeredUser');
-    } catch (e) {
-      // Handle registration error
-      print('Error registering user: $e');
-    }
-  }
+  final TextEditingController nameController = TextEditingController();
 
+  final TextEditingController emailController = TextEditingController();
+
+  final TextEditingController passwordController = TextEditingController();
+
+  final TextEditingController phoneController = TextEditingController();
+
+  final TextEditingController addressController = TextEditingController();
+
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  bool isRider = false;
+
+  // void _registerUser(BuildContext context) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,30 +50,6 @@ class RegisterPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    // Stack(
-                    //   children: [
-                    //     SizedBox(
-                    //       height: 150,
-                    //       width: double.infinity,
-                    //       child: Image.network(
-                    //         imageURL,
-                    //         fit: BoxFit.fill,
-                    //       ),
-                    //     ),
-                    //     const Positioned(
-                    //       top: 30,
-                    //       left: 20,
-                    //       child: Text(
-                    //         'Same Day Delivery',
-                    //         style: TextStyle(
-                    //           color: Colors.black,
-                    //           fontSize: 24,
-                    //           fontWeight: FontWeight.bold,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     const SizedBox(height: 50),
                     const Text(
                       'Register',
@@ -104,6 +75,12 @@ class RegisterPage extends StatelessWidget {
                       isPassword: true,
                     ),
                     const SizedBox(height: 20),
+                    CustomTextFromField(
+                      label: 'confirm password',
+                      controller: confirmPasswordController,
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 20),
                     Row(
                       children: <Widget>[
                         Expanded(
@@ -121,6 +98,19 @@ class RegisterPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                            value: isRider,
+                            onChanged: (p0) {
+                              setState(() {
+                                isRider = p0!;
+                              });
+                            }),
+                        const Text('Are you a rider?'),
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     CustomButton(
                       text: const Text(
@@ -130,9 +120,47 @@ class RegisterPage extends StatelessWidget {
                           fontSize: 20,
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          _registerUser(context);
+                          if (passwordController.text !=
+                              confirmPasswordController.text) {
+                            showCustomSnackBar(
+                              context,
+                              message: "Passwords do not match",
+                            );
+                            return;
+                          }
+
+                          UserModel user = UserModel(
+                            userId: DateTime.now()
+                                .millisecondsSinceEpoch
+                                .toString(), //timeand date id
+                            userName: nameController.text,
+                            userEmail: emailController.text,
+                            userPassword: passwordController.text,
+                            userPhone: [phoneController.text],
+                            userAddress: addressController.text,
+                            userDate: DateTime.now().toString(),
+                            role: isRider ? "rider" : "user",
+                          );
+                          try {
+                            await ApiService.registerUser(user);
+                            showCustomSnackBar(
+                              context,
+                              message: "Registered Succesfully. Please Login!",
+                              headingText: "Success!",
+                              color: Colors.green,
+                            );
+                            Navigator.pop(context);
+                          } on Exception catch (e) {
+                            if (mounted) {
+                              showCustomSnackBar(
+                                context,
+                                message:
+                                    "Failed To register user ${e.toString()}",
+                              );
+                            }
+                          }
                         }
                       },
                     ),
@@ -164,11 +192,9 @@ class RegisterPage extends StatelessWidget {
                         const SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginPage(),
-                                ));
+                            Navigator.pop(
+                              context,
+                            );
                           },
                           child: const Text(
                             'Login',

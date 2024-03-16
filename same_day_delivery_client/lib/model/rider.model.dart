@@ -19,7 +19,7 @@ class RiderModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'rider_id': riderId,
+      '_id': riderId,
       'rider_name': riderName,
       'rider_email': riderEmail,
       'rider_password': riderPassword,
@@ -31,7 +31,7 @@ class RiderModel {
 
   factory RiderModel.fromJson(Map<String, dynamic> json) {
     return RiderModel(
-      riderId: json['rider_id'],
+      riderId: json['_id'],
       riderName: json['rider_name'],
       riderEmail: json['rider_email'],
       riderPassword: json['rider_password'],

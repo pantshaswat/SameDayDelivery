@@ -1,43 +1,81 @@
+import 'dart:convert';
+
 class UserModel {
-  String userId;
+  String? userId;
   String userName;
   String userEmail;
   String userPassword;
-  String userPhone;
+  List<dynamic> userPhone;
   String userAddress;
   String userDate;
+  String role;
 
   UserModel({
-    required this.userId,
+    this.userId,
     required this.userName,
     required this.userEmail,
     required this.userPassword,
     required this.userPhone,
     required this.userAddress,
     required this.userDate,
+    required this.role,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId,
-      'user_name': userName,
-      'user_email': userEmail,
-      'user_password': userPassword,
-      'user_phone': userPhone,
-      'user_address': userAddress,
-      'user_date': userDate,
+      '_id': userId,
+      'fullName': userName,
+      'email': userEmail,
+      'password': userPassword,
+      'phoneNumber': userPhone,
+      'address': userAddress,
+      'date': userDate,
+      'role': role,
     };
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      userId: json['user_id'],
-      userName: json['user_name'],
-      userEmail: json['user_email'],
-      userPassword: json['user_password'],
-      userPhone: json['user_phone'],
-      userAddress: json['user_address'],
-      userDate: json['user_date'],
+      userId: json['_id'],
+      userName: json['fullName'],
+      userEmail: json['email'],
+      userPassword: json['password'],
+      userPhone: json['phoneNumber'],
+      userAddress: json['address'],
+      userDate: json['date'],
+      role: json['role'] ?? "user",
+    );
+  }
+
+  String toJsonString() {
+    return '''
+    {
+      "_id": "$userId",
+      "fullName": "$userName",
+      "email": "$userEmail",
+      "password": "$userPassword",
+      "phoneNumber": "${userPhone[0].toString()}",
+      "address": "$userAddress",
+      "date": "$userDate",
+      "role": "$role"
+    }
+    ''';
+  }
+
+  factory UserModel.fromJsonString(String jsonString) {
+    final Map<String, dynamic> json =
+        jsonDecode(jsonString); // Use jsonDecode to parse the JSON string
+    return UserModel(
+      userId: json['_id'],
+      userName: json['fullName'],
+      userEmail: json['email'],
+      userPassword: json['password'],
+      userPhone: (json["phoneNumber"] != null && json["phoneNumber"].isNotEmpty)
+          ? [json["phoneNumber"].toString()]
+          : [],
+      userAddress: json['address'],
+      userDate: json['date'],
+      role: json['role'] ?? "user",
     );
   }
 }

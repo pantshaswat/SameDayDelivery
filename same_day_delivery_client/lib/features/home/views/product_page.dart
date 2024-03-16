@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/model/product.model.dart';
 import 'package:same_day_delivery_client/services/localStorage.dart';
 
@@ -89,7 +90,19 @@ class ProductPage extends StatelessWidget {
               flex: 1, // smaller size
               child: CustomButton(
                 onPressed: () async {
-                  await LocalStorage.saveCartitems(cartItems: [product]);
+                  final saved =
+                      await LocalStorage.saveCartitems(cartItems: [product]);
+                  if (!saved) {
+                    showCustomSnackBar(context,
+                        message: "Something went wrong");
+                  }
+                  showCustomSnackBar(
+                    context,
+                    message: "Item added to cart",
+                    color: Colors.green,
+                    icon: Icons.check_circle,
+                    headingText: "Success",
+                  );
                 },
                 text: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,

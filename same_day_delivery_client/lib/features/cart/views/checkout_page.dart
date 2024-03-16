@@ -3,12 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
+import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/location_selector.dart';
+import 'package:same_day_delivery_client/model/cart.item.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/services/location.dart';
 
 class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({super.key});
+  final List<CartItem> cartItems;
+  const CheckoutPage({super.key, required this.cartItems});
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -16,25 +19,26 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   GeoPoint? pickedLocation;
-  final List<Map<String, dynamic>> checkOutItems = [
-    {
-      "productName": "Running Shoes",
-      "shopName": "Sports Emporium",
-      "price": 700,
-      "quantity": 2,
-    },
-    {
-      "productName": "Wireless Earbuds",
-      "shopName": "Gadget Hub",
-      "price": 400,
-      "quantity": 1,
-    },
-  ];
+  // final List<Map<String, dynamic>> checkOutItems = [
+  //   {
+  //     "productName": "Running Shoes",
+  //     "shopName": "Sports Emporium",
+  //     "price": 700,
+  //     "quantity": 2,
+  //   },
+  //   {
+  //     "productName": "Wireless Earbuds",
+  //     "shopName": "Gadget Hub",
+  //     "price": 400,
+  //     "quantity": 1,
+  //   },
+  // ];
 
   String selectedPaymentMethod = '';
 
   @override
   Widget build(BuildContext context) {
+    print(widget.cartItems.length);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -50,7 +54,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            OrderSummary(checkedItems: checkOutItems),
+            OrderSummary(checkedItems: widget.cartItems),
             DeliveryPlace(
               pickedLocation: pickedLocation,
               onLocationSelected: (p0) {
@@ -84,12 +88,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
 }
 
 class OrderSummary extends StatelessWidget {
-  final List<Map<String, dynamic>> checkedItems;
+  final List<CartItem> checkedItems;
 
   const OrderSummary({super.key, required this.checkedItems});
 
   @override
   Widget build(BuildContext context) {
+    print(checkedItems.length);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -128,7 +133,7 @@ class OrderSummary extends StatelessWidget {
 }
 
 class ItemDetail extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final CartItem item;
 
   const ItemDetail({super.key, required this.item});
 
@@ -161,7 +166,7 @@ class ItemDetail extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  item['productName'],
+                  item.title,
                   style: TextStyle(
                     overflow: TextOverflow.ellipsis,
                     fontSize: 16,
@@ -170,7 +175,7 @@ class ItemDetail extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  item['shopName'],
+                  item.addedDate,
                   style: const TextStyle(
                     overflow: TextOverflow.ellipsis,
                     fontSize: 10,
@@ -183,7 +188,7 @@ class ItemDetail extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "Price:Rs. ${item['price']},",
+                      "Price:Rs. ${item.price},",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -194,7 +199,7 @@ class ItemDetail extends StatelessWidget {
                       width: 100,
                     ),
                     Text(
-                      "Qty:${item['quantity']}",
+                      "Qty:${item.quantity}",
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -588,11 +593,13 @@ class _PlaceOrderState extends State<PlaceOrder> {
                 onPressed: () async {
                   final currentPosition = await LocationService().getLocation();
                   if (widget.pickedLocation == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Please select delivery location"),
-                      ),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(
+                    //     content: Text("Please select delivery location"),
+                    //   ),
+                    // );
+                    showCustomSnackBar(context,
+                        message: "You forgot to select location");
                     return;
                   }
                   goRouter.push("/cart/riderPage", extra: {
