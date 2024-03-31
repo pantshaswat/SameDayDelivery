@@ -91,24 +91,26 @@ class _CartPageState extends State<CartPage> {
                       child: Text("Error: ${snapshot.error}"),
                     );
                   }
-                  return const Center(
-                    child: Text("No items in cart"),
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Center(
+                        child: Text("No items in cart"),
+                      ),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {});
+                          },
+                          child: const Text("Refresh"),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
             )),
-            // Positioned.fill(
-            //   child: Padding(
-            //     padding: const EdgeInsets.symmetric(vertical: 10),
-            //     child: ListView.separated(
-            //       separatorBuilder: (context, index) => const Divider(),
-            //       itemCount: cartItems.length,
-            //       itemBuilder: (context, index) {
-            //         return ItemDetail(cartItem: cartItems[index]);
-            //       },
-            //     ),
-            //   ),
-            // ),
             Positioned(
               left: 0,
               right: 0,
@@ -258,51 +260,6 @@ class _ItemCountState extends State<ItemDetail> {
                       const SizedBox(
                         width: 25,
                       ),
-                      // Container(
-                      //   padding: const EdgeInsets.all(3),
-                      //   width: 70,
-                      //   decoration: BoxDecoration(
-                      //       borderRadius: BorderRadius.circular(20),
-                      //       border: Border.all(color: Colors.grey)),
-                      //   child: Row(
-                      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //     children: [
-                      //       GestureDetector(
-                      //         onTap: () {
-                      //           if (quantity > 1) {
-                      //             setState(() {
-                      //               quantity--;
-                      //             });
-                      //           }
-                      //         },
-                      //         child: const Icon(
-                      //           Icons.remove,
-                      //           size: 13,
-                      //           color: Colors.grey,
-                      //         ),
-                      //       ),
-                      //       Text(
-                      //         '$quantity',
-                      //         style: const TextStyle(
-                      //           fontSize: 15,
-                      //           color: Colors.grey,
-                      //         ),
-                      //       ),
-                      //       GestureDetector(
-                      //         onTap: () {
-                      //           setState(() {
-                      //             quantity++;
-                      //           });
-                      //         },
-                      //         child: const Icon(
-                      //           Icons.add,
-                      //           size: 13,
-                      //           color: Colors.grey,
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
                     ],
                   )
                 ],

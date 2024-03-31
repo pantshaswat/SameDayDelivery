@@ -8,13 +8,13 @@ import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/services/localStorage.dart';
 
 void listenRideRequest(BuildContext parentContext) async {
+  final TextEditingController controller = TextEditingController();
   return socket.on(
       'request',
       (request) => {
             showDialog(
               context: parentContext,
               builder: (BuildContext context) {
-                TextEditingController controller = TextEditingController();
                 return Theme(
                   data: ThemeData.light(),
                   child: AlertDialog(

@@ -5,8 +5,10 @@ import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/services/api.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class LoginPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -91,11 +93,24 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
-                        //use loginuser
                         try {
                           final response = await ApiService.signInUser(
                               nameController.text, passwordController.text);
-                          if (response["success"] == true) {
+                          print(response["success"]);
+                          if (response == null) {
+                            showCustomSnackBar(context,
+                                message: "Something went wrong!");
+                            return;
+                          }
+                          if (response["success"]) {
+                            print(response["user"].runtimeType);
+                            await LocalStorage.saveUser(
+                                UserModel.fromJson(response["user"]));
+                            // UserModel logInUser =
+                            //     UserModel.fromJson(response["user"]);
+
+                            // print(logInUser.toJson());
+                            // await LocalStorage.saveUser(logInUser);
                             response["user"]["role"] == 'rider'
                                 ? socket
                                     .emit('riderConnected', {response["user"]})

@@ -153,6 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             );
                             Navigator.pop(context);
                           } on Exception catch (e) {
+                            print(e.toString());
                             if (mounted) {
                               showCustomSnackBar(
                                 context,

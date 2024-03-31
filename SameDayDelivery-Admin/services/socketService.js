@@ -13,12 +13,15 @@ function initializeSocketIO(server) {
         //on riders connected,
         //their mongodb _id is sent from frontend
         //storing _id:socket.io in a object
-        socket.on('riderConnected', (id) => {
-            riderId[id.riderId] = socket.id;
-            console.log(`rider connected ${id.riderId}`)
+        socket.on('riderConnected', (rider) => {
+            // riderId[id.riderId] = socket.rider;
+            // console.log(`rider connected ${id.riderId}`)
+            riderId[rider._id] = socket.id;
+            console.log(riderId);
         });
 
         socket.on('requestRide', (request) => {
+            console.log("Requset for ride")
             console.log(request);
             //ToDo:
             //store requesting user socket.id in a var
@@ -36,9 +39,10 @@ function initializeSocketIO(server) {
         socket.on('bid', (bid) => {
             //from _id we can get rider info from mongodb
             //and send rider and his Rs amount to requesting user
-            const userId = bid.userId;
+            const userId = bid['userId'];
 
             //here keep .to(requesting user socket.id)
+            console.log(requestUserId[userId]);
             socket.to(requestUserId[userId]).emit('bid', bid);
             //this will emit bid in frontend
         });
@@ -46,9 +50,10 @@ function initializeSocketIO(server) {
         socket.on('riderSelected', (rider) => {
             //from the riderId object, find the rider 
             console.log(rider);
-            const id = rider.riderId;
+            const id = rider['riderId'];
+
             //.to(found rider socket id)
-            socket.to(riderId[id]).emit('success', 'You are selected to be the rider');
+            socket.to(riderId[id]).emit('success', rider);
             //handle this in frontend
         })
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/features/socket/biddingPage.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
 import 'package:same_day_delivery_client/services/listenRideRequest.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +16,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final parentContext = context;
@@ -27,12 +28,12 @@ class MyApp extends StatelessWidget {
                   context: parentContext,
                   builder: (parentContext) {
                     return Center(
-                      child: Container(
+                      child: SizedBox(
                           height: 400,
                           width: 400,
                           child: Text(data[0].toString())),
                     );
-                  })
+                  }),
             });
     return MaterialApp.router(
       title: "Same Day Delivery",

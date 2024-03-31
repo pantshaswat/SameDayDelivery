@@ -101,6 +101,7 @@ class LocalStorage {
   static Future<UserModel?> getUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final userString = prefs.getString('user');
+    print("userString: $userString");
     if (userString == null) {
       return null;
     }
@@ -110,5 +111,33 @@ class LocalStorage {
   static Future<void> removeUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('user');
+  }
+
+  static Future<void> saveRider(String riderId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> riders = prefs.getStringList('riders') ?? [];
+    if (!riders.contains(riderId)) {
+      riders.add(riderId);
+    }
+    prefs.setStringList('riders', riders);
+  }
+
+  static Future<List<String>?> getRider() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('riders');
+  }
+
+  static Future<void> rateRider(String riderId, double rating) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("rider-$riderId", rating.toString());
+  }
+
+  static Future<double?> getRiderRating(String riderId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final rating = prefs.getString("rider-$riderId");
+    if (rating == null) {
+      return null;
+    }
+    return double.parse(rating);
   }
 }

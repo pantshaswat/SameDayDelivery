@@ -104,24 +104,4 @@ GoRouter goRouter = GoRouter(
   ],
   //   )
   // ],
-  redirect: (context, state) async {
-    final cookieToken = await ApiService.getAuthTokenFromCookies();
-    final localToken = await LocalStorage.getToken();
-
-    if (state.matchedLocation.contains('/home')) {
-      if (localToken == null) {
-        return '/login';
-      }
-      return null;
-    }
-    if ((state.matchedLocation.contains('/login')) && (localToken != null)) {
-      return '/home';
-    }
-    if ((state.matchedLocation.contains('/signup')) &&
-        (cookieToken != null || localToken != null)) {
-      print(localToken);
-      return '/home';
-    }
-    return null;
-  },
 );

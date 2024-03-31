@@ -275,18 +275,15 @@ class _RiderSelectPage extends State<RiderSelectPage> {
             CustomButton(
               onPressed: () async {
                 //check if mounted
-                if (mounted) {
-                  final UserModel? user = await LocalStorage.getUser();
-                  if (user!.userId == null) {
-                    return;
-                  }
-                  socket.emit('requestRide', {
-                    'userId': user.userId,
-                    'startingPoint': 'dhulikhel',
-                    'endingPoint': 'banepa',
-                    'amount': '100'
-                  });
-                }
+
+                final UserModel? user = await LocalStorage.getUser();
+                await LocalStorage.saveRider(user!.userId!);
+                socket.emit('requestRide', {
+                  'userId': user!.userId,
+                  'startingPoint': 'dhulikhel',
+                  'endingPoint': 'banepa',
+                  'amount': '100'
+                });
               },
               text: const Text("Request a Ride"),
             ),
@@ -313,7 +310,7 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                           title: Text(bidLists[index]['riderId']),
                           subtitle: Text(bidLists[index]['amount']),
                           trailing: GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               socket.emit('riderSelected', {
                                 "riderId": bidLists[index]['riderId'],
                                 "userId": '56789',
@@ -321,6 +318,9 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                                 "from": "dhulikhel",
                                 "to": "banepa"
                               });
+
+                              await LocalStorage.saveRider(
+                                  bidLists[index]['riderId']);
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
