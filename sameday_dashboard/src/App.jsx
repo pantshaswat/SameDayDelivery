@@ -19,8 +19,8 @@ function App() {
           
 
 
-          <Route exact path="/" element={<div>Hello</div>} />
-                        <Route path="/products" element={<Products />} />
+          {/* <Route exact path="/" element={<div>Hello</div>} /> */}
+                        <Route path="/" element={<Products />} />
           <Route path="/products/edit/:id" element={<ProductEditPage />} />
           <Route path="/products/create" element={<ProductNewPage/>} />
 

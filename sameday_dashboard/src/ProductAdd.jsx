@@ -37,6 +37,8 @@ const ProductNewPage = () => {
         product_image: "",
         product_date: new Date(),
       });
+      //NAVIGATE TO PRODUCT
+      window.location.replace("/");
     } catch (error) {
       console.error("Error adding product:", error);
     }
