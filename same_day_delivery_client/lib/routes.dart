@@ -9,6 +9,7 @@ import 'package:same_day_delivery_client/features/cart/views/checkout_page.dart'
 import 'package:same_day_delivery_client/features/home/views/home_page.dart';
 import 'package:same_day_delivery_client/features/home/views/product_page.dart';
 import 'package:same_day_delivery_client/features/profile/views/profile_page.dart';
+import 'package:same_day_delivery_client/features/search/page.dart';
 import 'package:same_day_delivery_client/features/socket/riderSelectPage.dart';
 import 'package:same_day_delivery_client/model/cart.item.model.dart';
 import 'package:same_day_delivery_client/model/product.model.dart';
@@ -101,6 +102,11 @@ GoRouter goRouter = GoRouter(
 
           return ProductPage(product: productDetails);
         }),
+    GoRoute(path: '/search/:query', builder: (context, state) {
+      print("state.extra: ${state.extra}");
+      final String query = (state.extra as Map)["query"].toString();
+      return SearchPage(searchQuery:query );
+    }),
   ],
   //   )
   // ],

@@ -14,6 +14,7 @@ const productModel = new mongoose.Schema({
     product_name: {
         type: String,
         required: true,
+        index: true,
     },
     product_price: {
         type: Number,
