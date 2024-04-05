@@ -4,18 +4,13 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
-// Add this configuration for CORS
-app.use(cors());
-
-// Other middleware and routes
-app.use(express.raw());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(express.static(path.resolve("./public")));
-
-// Your routes
+app.use(
+  cors({
+    origin: "http://localhost:5173", //frontend url
+    credentials: true,
+  })
+);
+//routes
 const orderRoutes = require("./routes/order.routes");
 const userRoutes = require("./routes/user.routes");
 const productRoutes = require("./routes/product.routes");

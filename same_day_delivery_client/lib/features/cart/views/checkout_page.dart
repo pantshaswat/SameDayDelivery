@@ -434,53 +434,53 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ]),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Container(
-            height: 50,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(children: [
-              const SizedBox(
-                width: 8,
-              ),
-              const Icon(Icons.web),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(
-                "Digital payment",
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const Spacer(),
-              Checkbox(
-                activeColor: MaterialStateColor.resolveWith(
-                  (states) => Colors.grey,
-                ),
-                value: digitalPaymentChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    digitalPaymentChecked = value!;
-                    widget.onPaymentMethodSelected(
-                      digitalPaymentChecked
-                          ? "Digital payment"
-                          : cashOnDeliveryChecked
-                              ? "Cash on Delivery"
-                              : "",
-                    );
-                  });
-                },
-              ),
-            ]),
-          ),
-        )
+        // Padding(
+        //   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        //   child: Container(
+        //     height: 50,
+        //     width: double.infinity,
+        //     decoration: BoxDecoration(
+        //       border: Border.all(color: Colors.grey),
+        //       borderRadius: BorderRadius.circular(10),
+        //     ),
+        //     child: Row(children: [
+        //       const SizedBox(
+        //         width: 8,
+        //       ),
+        //       const Icon(Icons.web),
+        //       const SizedBox(
+        //         width: 10,
+        //       ),
+        //       Text(
+        //         "Digital payment",
+        //         style: TextStyle(
+        //           fontSize: 15,
+        //           fontWeight: FontWeight.w500,
+        //           color: Colors.grey[800],
+        //         ),
+        //       ),
+        //       const Spacer(),
+        //       Checkbox(
+        //         activeColor: MaterialStateColor.resolveWith(
+        //           (states) => Colors.grey,
+        //         ),
+        //         value: digitalPaymentChecked,
+        //         onChanged: (bool? value) {
+        //           setState(() {
+        //             digitalPaymentChecked = value!;
+        //             widget.onPaymentMethodSelected(
+        //               digitalPaymentChecked
+        //                   ? "Digital payment"
+        //                   : cashOnDeliveryChecked
+        //                       ? "Cash on Delivery"
+        //                       : "",
+        //             );
+        //           });
+        //         },
+        //       ),
+        //     ]),
+        //   ),
+        // )
       ],
     );
   }
