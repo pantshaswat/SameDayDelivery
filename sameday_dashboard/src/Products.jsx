@@ -52,7 +52,7 @@ const handleDelete = async (productId) => {
 
   const columns = useMemo(
     () => [
-      { Header: "ID", accessor: "_id" },
+      { Header: "ID", accessor: "product_id" },
       { Header: "Name", accessor: "product_name" },
       { Header: "Price", accessor: "product_price" },
       { Header: "Image", accessor: "product_image" },
@@ -71,7 +71,7 @@ const handleDelete = async (productId) => {
             </Link> */}
                 
             <button
-              onClick={() => handleDelete(row.original.product_id)}
+              onClick={() => console.log(row.original.product_id)}
               className="btn btn-danger btn-sm rounded bg-red-500 px-4 text-white"
             >
               Delete
