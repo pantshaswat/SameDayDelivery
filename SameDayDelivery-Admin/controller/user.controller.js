@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
 
 exports.signIn = async (req, res) => {
   const { email, password } = req.body;
-  console.log("Received data:", req.body)
+  console.log("Received data:", req.body);
 
   if (!(email && password)) {
     console.log("All input is required");
@@ -95,7 +95,7 @@ exports.getUser = async (req, res) => {
   }
 
   return res.status(200).send(user);
-}
+};
 
-exports.updateUser = async (req, res) => { };
-exports.deleteUser = async (req, res) => { };
+exports.updateUser = async (req, res) => {};
+exports.deleteUser = async (req, res) => {};
