@@ -76,5 +76,26 @@ exports.signOut = async (req, res) => {
   });
 };
 
+exports.getUser = async (req, res) => {
+  const { id } = req.params;
+  id = ObjectId(id);
+  console.log("Received data:", req.params);
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send({
+      message: "Invalid id",
+    });
+  }
+
+  const user = await userModel.findById(id);
+  if (!user) {
+    return res.status(404).send({
+      message: "User not found",
+    });
+  }
+
+  return res.status(200).send(user);
+}
+
 exports.updateUser = async (req, res) => { };
 exports.deleteUser = async (req, res) => { };

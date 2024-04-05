@@ -107,4 +107,21 @@ class ApiService {
       rethrow;
     }
   }
+
+  static Future<UserModel>getUser(String userId) async {
+    try {
+      final Response response = await dio.get("/user/$userId",
+          options: Options(
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+            },
+            responseType: ResponseType.plain,
+          ));
+      final responseData = jsonDecode(response.data);
+      return UserModel.fromJson(responseData["data"]);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
