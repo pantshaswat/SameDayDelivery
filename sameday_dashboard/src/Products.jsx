@@ -13,7 +13,7 @@ const Products = () => {
         const response = await axios.get("http://localhost:3000/product");
         if (response.data && Array.isArray(response.data.data)) {
             setProducts(response.data.data);
-            console.log(response.data);
+            console.log(response.data.data);
         } else {
           console.error("Invalid data structure:", response.data);
         }
