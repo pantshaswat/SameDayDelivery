@@ -55,6 +55,7 @@ exports.getProduct = async (req, res) => {
   }
   try {
     const product = await productModel.find(filter).limit(limit).skip(skip);
+    console.log(product);
     return res.send({
       status: 200,
       message: "Product fetched successfully",

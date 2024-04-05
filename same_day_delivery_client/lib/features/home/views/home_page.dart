@@ -35,15 +35,7 @@ class _HomePageState extends State<HomePage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.shopping_bag,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+        
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -344,6 +336,9 @@ class SearchBar extends StatelessWidget {
               onTapOutside: (event) {
                 FocusScope.of(context).unfocus();
               },
+              onChanged: (value) {
+                searchController.text = value;
+              },
               cursorColor: Colors.black,
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -355,7 +350,10 @@ class SearchBar extends StatelessWidget {
         GestureDetector(
           onTap: () {
             if (searchController.text.isNotEmpty) {
-              GoRouter.of(context).go("/search/${searchController.text}");
+              GoRouter.of(context).push("/search/${searchController.text}",
+              extra: {
+                "query": searchController.text,
+              });
             }
             return;
           },
@@ -367,7 +365,7 @@ class SearchBar extends StatelessWidget {
               color: Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: const Icon(Icons.filter_list),
+            child: const Icon(Icons.search, color: Colors.black),
           ),
         ),
       ],

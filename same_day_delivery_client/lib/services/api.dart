@@ -124,4 +124,27 @@ class ApiService {
       rethrow;
     }
   }
+
+
+
+  static Future<List<ProductModel>> searchProducts(String query) async {
+    try {
+      final Response response = await dio.get("/product?product_name=$query",
+          options: Options(
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+            },
+            responseType: ResponseType.plain,
+          ));
+      final responseData = jsonDecode(response.data);
+      List<ProductModel> products = [];
+      for (var product in responseData["data"]) {
+        products.add(ProductModel.fromJson(product));
+      }
+      return products;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
