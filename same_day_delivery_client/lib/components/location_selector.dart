@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:same_day_delivery_client/services/location.dart';
 
@@ -41,12 +42,9 @@ class _LocationSelectorState extends State<LocationSelector> {
           widget.onLocationSelected(geopoint);
         }
       },
-      child: const Image(
+      child: Image.asset(
+        "assets/images/map.jpg",
         width: 160,
-        image: NetworkImage(
-          "https://joomly.net/frontend/web/images/googlemap/map.png",
-        ),
-        fit: BoxFit.fill,
       ),
     );
   }

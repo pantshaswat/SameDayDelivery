@@ -8,6 +8,7 @@ class ProductModel {
   String productImage;
   String productDescription;
   String productDate;
+  String productLocation;
 
   ProductModel({
     required this.productId,
@@ -17,6 +18,7 @@ class ProductModel {
     required this.productImage,
     required this.productDescription,
     required this.productDate,
+    required this.productLocation,
   });
 
   Map<String, dynamic> toJson() {
@@ -28,6 +30,7 @@ class ProductModel {
       'product_image': productImage,
       'product_description': productDescription,
       'product_date': productDate,
+      'product_location': productLocation,
     };
   }
 
@@ -40,6 +43,7 @@ class ProductModel {
       productImage: json['product_image'],
       productDescription: json['product_description'],
       productDate: json['product_date'],
+      productLocation: json['product_location'] ?? "",
     );
   }
 
@@ -51,7 +55,8 @@ class ProductModel {
       "productPrice": $productPrice,
       "productImage": "$productImage",
       "productDescription": "$productDescription",
-      "productDate": "$productDate"
+      "productDate": "$productDate",
+      "productLocation": "$productLocation"
     }""");
   }
 
@@ -65,6 +70,7 @@ class ProductModel {
       productImage: json['productImage'],
       productDescription: json['productDescription'],
       productDate: json['productDate'],
+      productLocation: json['productLocation'] ?? "",
     );
   }
 }

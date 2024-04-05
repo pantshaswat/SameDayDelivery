@@ -9,7 +9,7 @@ class CartItem {
   final double price;
   final String imageUrl;
   final String addedDate = DateTime.now().toString();
-  final bool isChecked = false;
+  bool isChecked = false;
 
   CartItem({
     required this.id,
@@ -72,5 +72,9 @@ class CartItem {
       price: product.productPrice.toDouble(),
       imageUrl: product.productImage,
     );
+  }
+
+  void isCheckedToggle() {
+    isChecked = !isChecked;
   }
 }

@@ -1,6 +1,7 @@
 const userModel = require("../model/user.model");
 const md5 = require("md5");
 const { createJwt } = require("../middlewares/jwtAuthMiddleware");
+const { mongoose } = require("mongoose");
 
 exports.register = async (req, res) => {
   const body = req.body;
@@ -20,6 +21,7 @@ exports.register = async (req, res) => {
     password: md5Password,
     fullName: body.fullName,
     phoneNumber: body.phoneNumber ?? "",
+    address: body.address,
     role: body.role ?? "user",
   });
   return res.status(201).send(user);
@@ -27,6 +29,7 @@ exports.register = async (req, res) => {
 
 exports.signIn = async (req, res) => {
   const { email, password } = req.body;
+  console.log("Received data:", req.body);
 
   if (!(email && password)) {
     console.log("All input is required");
@@ -48,6 +51,7 @@ exports.signIn = async (req, res) => {
   if (!password_check) {
     console.log("Invalid credentials");
     return res.status(400).send({
+      success: false,
       message: "Invalid credentials",
     });
   }
@@ -63,12 +67,34 @@ exports.signIn = async (req, res) => {
     .send({
       success: true,
       message: "Logged in successfully",
+      user: user,
     });
 };
 exports.signOut = async (req, res) => {
   return res.status(201).clearCookie("token").send({
     message: "Logged out successfully",
   });
+};
+
+exports.getUser = async (req, res) => {
+  const { id } = req.params;
+  id = ObjectId(id);
+  console.log("Received data:", req.params);
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send({
+      message: "Invalid id",
+    });
+  }
+
+  const user = await userModel.findById(id);
+  if (!user) {
+    return res.status(404).send({
+      message: "User not found",
+    });
+  }
+
+  return res.status(200).send(user);
 };
 
 exports.updateUser = async (req, res) => {};

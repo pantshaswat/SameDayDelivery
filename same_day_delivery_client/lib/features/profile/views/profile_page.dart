@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -11,6 +13,8 @@ class ProfilePage extends StatelessWidget {
         children: [
           ProfileSection(),
           MyOrder(),
+          PreviousRiders(),
+          RatedRiders(),
           Services(),
         ],
       ),
@@ -28,58 +32,39 @@ class ProfileSection extends StatelessWidget {
       width: double.infinity,
       color: Color.fromARGB(255, 240, 239, 239),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Stack(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
+        child: Row(
           children: [
-            Positioned(
-              left: 10,
-              top: 70,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(200),
-                  child: Image(
-                    height: 100,
-                    width: 100,
-                    image: NetworkImage(
-                        "https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg"),
-                    fit: BoxFit.cover,
-                  )),
-            ),
-            Positioned(
-              top: 93,
-              right: 83,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Person name",
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[800],
-                    ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Person name",
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[800],
                   ),
-                  Text(
-                    "example@gmail.com",
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(255, 82, 82, 82),
-                    ),
+                ),
+                Text(
+                  "example@gmail.com",
+                  style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color.fromARGB(255, 82, 82, 82),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Positioned(
-                top: 55,
-                right: 20,
-                child: Icon(
-                  Icons.settings,
-                  size: 28,
-                  color: const Color.fromARGB(255, 113, 113, 113),
-                ))
+            Spacer(),
+            Icon(
+              Icons.settings,
+              size: 28,
+              color: const Color.fromARGB(255, 113, 113, 113),
+            )
           ],
         ),
       ),
@@ -136,9 +121,7 @@ class MyOrder extends StatelessWidget {
                   width: 17,
                 ),
                 OrderStatus(
-                    icon: Icons.file_copy,
-                    label: 'Preorder',
-                    onPressed: () {})
+                    icon: Icons.file_copy, label: 'Preorder', onPressed: () {})
               ],
             ),
           )
@@ -171,7 +154,9 @@ class OrderStatus extends StatelessWidget {
             size: 28,
             color: Color.fromARGB(255, 82, 82, 82),
           ),
-          SizedBox(height: 8,),
+          SizedBox(
+            height: 8,
+          ),
           Text(label)
         ],
       ),
@@ -179,14 +164,21 @@ class OrderStatus extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class Services extends StatelessWidget {
   Services({super.key});
 
   List<Map<String, dynamic>> services = [
-    {"icon": Icons.folder, "label": "Browsing History", "onPressed": () {}},
-    {"icon": Icons.location_on, "label": "Address", "onPressed": () {}},
-    {"icon": Icons.support_agent_outlined, "label": "Support", "onPressed": () {}},
-    {"icon": Icons.info, "label": "About Us", "onPressed": () {}}
+    {
+      "icon": Icons.logout,
+      "label": "Logout",
+      "onPressed": () async {
+        await LocalStorage.removeToken();
+        await LocalStorage.removeUser();
+        goRouter.refresh();
+        goRouter.go('/login');
+      }
+    },
   ];
   @override
   Widget build(BuildContext context) {
@@ -243,7 +235,142 @@ class ServiceTile extends StatelessWidget {
       leading: Icon(icon),
       title: Text(label),
       trailing: IconButton(
-          onPressed: onPressed, icon: Icon(Icons.arrow_circle_right)),
+          onPressed: onPressed, icon: const Icon(Icons.arrow_circle_right)),
+    );
+  }
+}
+
+class PreviousRiders extends StatelessWidget {
+  const PreviousRiders({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Previous Riders",
+          style: TextStyle(
+            overflow: TextOverflow.ellipsis,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[800],
+          ),
+        ),
+        FutureBuilder(
+          future: LocalStorage.getRider(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text("An error occurred"),
+              );
+            }
+            if (snapshot.data == null) {
+              return const Center(
+                child: Text("No previous riders"),
+              );
+            }
+            return SizedBox(
+              height: 150,
+              child: ListView.builder(
+                itemCount: 1,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () async {
+                      await LocalStorage.rateRider(snapshot.data![index], 5);
+                    },
+                    child: ListTile(
+                      title: Text(snapshot.data![index]),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class RatedRiders extends StatelessWidget {
+  const RatedRiders({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Rated Riders",
+          style: TextStyle(
+            overflow: TextOverflow.ellipsis,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[800],
+          ),
+        ),
+        FutureBuilder(
+          future: LocalStorage.getRider(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text("An error occurred"),
+              );
+            }
+            if (snapshot.data == null) {
+              return const Center(
+                child: Text("No previous riders"),
+              );
+            }
+            return SizedBox(
+              height: 150,
+              child: ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  return FutureBuilder(
+                      future:
+                          LocalStorage.getRiderRating(snapshot.data![index]),
+                      builder: (context, snapshots) {
+                        if (snapshots.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (snapshots.hasError) {
+                          return const Center(
+                            child: Text("An error occurred"),
+                          );
+                        }
+                        if (snapshots.data == null) {
+                          return const Center(
+                            child: Text("No previous riders"),
+                          );
+                        }
+                        return ListTile(
+                          title: Text(snapshot.data![index]),
+                          subtitle: Text(snapshots.data.toString()),
+                        );
+                      });
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

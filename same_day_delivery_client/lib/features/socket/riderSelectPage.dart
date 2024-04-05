@@ -1,12 +1,9 @@
-// ignore: file_names
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
-import 'package:same_day_delivery_client/features/socket/biddingPage.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 import 'package:same_day_delivery_client/services/location.dart';
 
 class RiderSelectPage extends StatefulWidget {
@@ -250,31 +247,47 @@ class _RiderSelectPage extends State<RiderSelectPage> {
               ],
             ),
             // Spacer(),
-            CustomButton(
-                onPressed: () {
-                  socket.emit('riderConnected',
-                      {"name": "Shaswat", "riderId": "12345"});
-                },
-                text: Text("Be a Rider")),
+            FutureBuilder(
+                future: LocalStorage.getUser(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CustomButton(text: "Loading...", onPressed: () {});
+                  }
+
+                  return CustomButton(
+                      onPressed: () async {
+                        // final UserModel? user = await LocalStorage.getUser();
+                        final id = snapshot.data!.userId;
+                        socket.emit(
+                          'riderConnected',
+                          {
+                            "_id": id,
+                            "name": "Shaswat",
+                            "riderId": "12345",
+                          },
+                        );
+                      },
+                      text: Text("Be a Rider"));
+                }),
             const SizedBox(
               height: 10,
             ),
             CustomButton(
-              onPressed: () {
+              onPressed: () async {
                 //check if mounted
-                if (mounted) {
-                  socket.emit('requestRide', {
-                    'userId': '56789',
-                    'startingPoint': 'dhulikhel',
-                    'endingPoint': 'banepa',
-                    'amount': '100'
-                  });
-                }
+
+                final UserModel? user = await LocalStorage.getUser();
+                await LocalStorage.saveRider(user!.userId!);
+                socket.emit('requestRide', {
+                  'userId': user!.userId,
+                  'startingPoint': 'dhulikhel',
+                  'endingPoint': 'banepa',
+                  'amount': '100'
+                });
               },
               text: const Text("Request a Ride"),
             ),
             Expanded(
-              flex: 1,
               child: StreamBuilder(
                 stream: requestStreamSocket.getResponse,
                 builder: (BuildContext context, snapshot) {
@@ -283,7 +296,6 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                       child: SizedBox(),
                     );
                   }
-                  print(snapshot.data);
                   bidLists.add(snapshot.data![0]);
                   if (!snapshot.hasData) {
                     return const Center(
@@ -298,7 +310,7 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                           title: Text(bidLists[index]['riderId']),
                           subtitle: Text(bidLists[index]['amount']),
                           trailing: GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               socket.emit('riderSelected', {
                                 "riderId": bidLists[index]['riderId'],
                                 "userId": '56789',
@@ -306,6 +318,9 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                                 "from": "dhulikhel",
                                 "to": "banepa"
                               });
+
+                              await LocalStorage.saveRider(
+                                  bidLists[index]['riderId']);
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),

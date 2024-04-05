@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
 const sellerModel = new mongoose.Schema({
-    seller_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        default:new mongoose.Types.ObjectId,
-    },
     seller_name: {
         type: String,
         required: true,

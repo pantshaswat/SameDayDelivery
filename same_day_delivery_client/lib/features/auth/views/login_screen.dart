@@ -1,11 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
+import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/services/api.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class LoginPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -55,7 +58,7 @@ class LoginPage extends StatelessWidget {
                     //     ),
                     //   ],
                     // ),
-                    const SizedBox(height: 250),
+                    const SizedBox(height: 150),
                     const Text(
                       'Login',
                       style: TextStyle(
@@ -64,8 +67,14 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 40),
+                    Center(
+                      child: Image.asset(
+                        'assets/images/xpress.png',
+                        height: 200,
+                      ),
+                    ),
                     CustomTextFromField(
-                      label: 'username',
+                      label: 'email',
                       controller: nameController,
                     ),
                     const SizedBox(height: 20),
@@ -76,19 +85,36 @@ class LoginPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
-                      text: Text(
+                      text: const Text(
                         'Login',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                         ),
                       ),
                       onPressed: () async {
-                        //use loginuser
                         try {
                           final response = await ApiService.signInUser(
                               nameController.text, passwordController.text);
-                          if (response["success"] == true) {
+                          print(response["success"]);
+                          if (response == null) {
+                            showCustomSnackBar(context,
+                                message: "Something went wrong!");
+                            return;
+                          }
+                          if (response["success"]) {
+                            print(response["user"].runtimeType);
+                            await LocalStorage.saveUser(
+                                UserModel.fromJson(response["user"]));
+                            // UserModel logInUser =
+                            //     UserModel.fromJson(response["user"]);
+
+                            // print(logInUser.toJson());
+                            // await LocalStorage.saveUser(logInUser);
+                            response["user"]["role"] == 'rider'
+                                ? socket
+                                    .emit('riderConnected', {response["user"]})
+                                : null;
                             goRouter.goNamed("home");
                             showCustomSnackBar(
                               context,
@@ -96,6 +122,10 @@ class LoginPage extends StatelessWidget {
                               color: Colors.green,
                               headingText: "Success!",
                             );
+                          } else if (response["message"] ==
+                              "Invalid Credentials") {
+                            showCustomSnackBar(context,
+                                message: "Invalid credentials");
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -104,11 +134,11 @@ class LoginPage extends StatelessWidget {
                             );
                           }
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          if (e is DioException &&
+                              e.response!.statusCode == 400) {
+                            showCustomSnackBar(context,
+                                message: "Invalid credentials");
+                          }
                           return;
                         }
                       },
@@ -141,8 +171,6 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
-                            //use registeruser
-
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -150,7 +178,7 @@ class LoginPage extends StatelessWidget {
                                 ));
                           },
                           child: const Text(
-                            'Sign Up',
+                            'Create Now',
                             style: TextStyle(
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,

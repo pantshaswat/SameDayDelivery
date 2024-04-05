@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/services/api.dart';
+import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,13 +26,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () {},
-          icon: Icon(
-            Icons.menu,
-            color: Colors.grey[900],
-          ),
-        ),
         centerTitle: true,
         title: const Text(
           "Explore",
@@ -52,8 +50,6 @@ class _HomePageState extends State<HomePage> {
           children: [
             //Search Section
             SearchBar(),
-            //Categories Section
-            CategoriesSection(),
             //Product Section
             BestSellerSection(),
             // BestSellerSection(),
@@ -118,9 +114,9 @@ class BestSellerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 250),
         child: Column(
           children: [
             Row(
@@ -152,6 +148,11 @@ class BestSellerSection extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
                       );
                     }
 
@@ -197,7 +198,7 @@ class BestSellerSection extends StatelessWidget {
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Container(
-                                            height: 120,
+                                            height: 90,
                                             color: Colors.grey[200],
                                             child: const Center(
                                                 child: Column(
@@ -317,7 +318,8 @@ class _LoveButtonState extends State<LoveButton> {
 }
 
 class SearchBar extends StatelessWidget {
-  const SearchBar({
+  final TextEditingController searchController = TextEditingController();
+  SearchBar({
     super.key,
   });
 
@@ -335,6 +337,10 @@ class SearchBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
             ),
             child: TextFormField(
+              controller: searchController,
+              onEditingComplete: () {
+                FocusScope.of(context).unfocus();
+              },
               onTapOutside: (event) {
                 FocusScope.of(context).unfocus();
               },
@@ -346,15 +352,23 @@ class SearchBar extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          height: 50,
-          width: 50,
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(15),
+        GestureDetector(
+          onTap: () {
+            if (searchController.text.isNotEmpty) {
+              GoRouter.of(context).go("/search/${searchController.text}");
+            }
+            return;
+          },
+          child: Container(
+            height: 50,
+            width: 50,
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Icon(Icons.filter_list),
           ),
-          child: const Icon(Icons.filter_list),
         ),
       ],
     );

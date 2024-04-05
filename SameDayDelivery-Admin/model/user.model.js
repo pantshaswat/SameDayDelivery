@@ -26,6 +26,15 @@ const userSchema = new Schema({
     enum: ["rider", "user", "shopkeeper"],
     default: "user",
   },
+
+  address: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const userModel = mongoose.model("users", userSchema);
