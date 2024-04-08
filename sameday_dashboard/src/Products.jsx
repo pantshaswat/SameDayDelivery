@@ -13,7 +13,7 @@ const Products = () => {
         const response = await axios.get("http://localhost:3000/product");
         if (response.data && Array.isArray(response.data.data)) {
             setProducts(response.data.data);
-            console.log(response.data);
+            console.log(response.data.data);
         } else {
           console.error("Invalid data structure:", response.data);
         }
@@ -71,7 +71,7 @@ const handleDelete = async (productId) => {
             </Link> */}
                 
             <button
-              onClick={() => console.log(row.original.product_id)}
+              onClick={() => handleDelete(row.original._id)}
               className="btn btn-danger btn-sm rounded bg-red-500 px-4 text-white"
             >
               Delete
@@ -97,7 +97,7 @@ const handleDelete = async (productId) => {
   return (
     <div className="container mx-auto mt-8 p-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Product Management</h2>
+        <h1 className="text-4xl font-semibold text-center">Product Management Dashboard</h1>
         <Link to="/products/create" className="btn btn-primary">
           Create New Product
         </Link>
