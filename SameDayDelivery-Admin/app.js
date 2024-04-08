@@ -15,6 +15,7 @@ app.use(
 const orderRoutes = require("./routes/order.routes");
 const userRoutes = require("./routes/user.routes");
 const productRoutes = require("./routes/product.routes");
+const rideRoutes = require('./routes/ride.routes');
 
 //middlewares
 app.use(express.raw());
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/order", orderRoutes);
 app.use("/user", userRoutes);
 app.use("/product", productRoutes);
+app.use('/ride',rideRoutes);
 
 
 module.exports = app;

@@ -1,5 +1,5 @@
 const socketIO = require('socket.io');
-
+const rideController = require('../controller/rideController')
 function initializeSocketIO(server) {
     const io = socketIO(server, {
         connectionStateRecovery: {}
@@ -47,11 +47,18 @@ function initializeSocketIO(server) {
             //this will emit bid in frontend
         });
         //now user will select a rider
-        socket.on('riderSelected', (rider) => {
+        socket.on('riderSelected', async (rider) => {
             //from the riderId object, find the rider 
             console.log(rider);
             const id = rider['riderId'];
 
+            await rideController.rideRecordFromSocket({
+                userId: rider.userId,
+                riderId: rider.riderId,
+                from: rider.from,
+                to: rider.to,
+                finalBid: rider.amount
+            })
             //.to(found rider socket id)
             socket.to(riderId[id]).emit('success', rider);
             //handle this in frontend

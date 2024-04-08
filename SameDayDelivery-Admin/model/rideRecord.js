@@ -21,21 +21,29 @@ const rideRecordModel = new mongoose.Schema({
         type: String,
         required: true,
     },
-    ride_date: {
+    rideDate: {
         type: Date,
-        required: true,
+        
         default: Date.now,
     },
-    ride_status: {
+    rideStatus: {
         type: String,
+        enum: ['Pending', 'Shipped'],
+        default: 'Pending',
         required: true,
     },
     riderRating:{
         type: Number,
-        required: true,
+        
+    },
+    userRating:{
+        type: Number
     },
     riderReview:{
         type: String,
+    },
+    userReview:{
+        type: String
     }
     
 });
