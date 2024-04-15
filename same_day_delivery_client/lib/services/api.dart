@@ -11,7 +11,7 @@ import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ApiService {
   static final CookieJar cookieJar = CookieJar();
-  static const String _baseUrl = "http://10.0.2.2:3000/";
+  static const String _baseUrl = "http://192.168.12.73:3000/";
   get baseUrl => _baseUrl;
   static final Dio dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
@@ -40,7 +40,6 @@ class ApiService {
       );
       List<Cookie> cookies =
           await cookieJar.loadForRequest(Uri.parse(_baseUrl));
-      print(cookies.toString());
       final token = extractAndProcessToken(cookies.toString());
       if (token != null) {
         await LocalStorage.saveToken(token);
@@ -49,7 +48,6 @@ class ApiService {
       print(responseData);
 
       final userType = responseData["user"]["role"] ?? "user";
-      print(userType);
       // await LocalStorage.saveUserType(userType);
       // await LocalStorage.saveUser(UserModel.fromJson(responseData["user"]));
       return responseData;
@@ -108,7 +106,7 @@ class ApiService {
     }
   }
 
-  static Future<UserModel>getUser(String userId) async {
+  static Future<UserModel> getUser(String userId) async {
     try {
       final Response response = await dio.get("/user/$userId",
           options: Options(
@@ -118,14 +116,12 @@ class ApiService {
             },
             responseType: ResponseType.plain,
           ));
-      final responseData = jsonDecode(response.data);
-      return UserModel.fromJson(responseData["data"]);
+      final responseData = await jsonDecode(response.data);
+      return UserModel.fromJson(responseData);
     } catch (e) {
       rethrow;
     }
   }
-
-
 
   static Future<List<ProductModel>> searchProducts(String query) async {
     try {

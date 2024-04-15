@@ -2,6 +2,7 @@ const userModel = require("../model/user.model");
 const md5 = require("md5");
 const { createJwt } = require("../middlewares/jwtAuthMiddleware");
 const { mongoose } = require("mongoose");
+const { ObjectId } = require("mongodb");
 
 exports.register = async (req, res) => {
   const body = req.body;
@@ -77,25 +78,22 @@ exports.signOut = async (req, res) => {
 };
 
 exports.getUser = async (req, res) => {
-  const { id } = req.params;
-  id = ObjectId(id);
+  var id = req.params["id"];
+  id = id.trim();
   console.log("Received data:", req.params);
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).send({
-      message: "Invalid id",
-    });
-  }
 
   const user = await userModel.findById(id);
   if (!user) {
+    console.log("User not found");
     return res.status(404).send({
       message: "User not found",
     });
   }
-
+console.log(user);
   return res.status(200).send(user);
 };
 
 exports.updateUser = async (req, res) => {};
 exports.deleteUser = async (req, res) => {};
+

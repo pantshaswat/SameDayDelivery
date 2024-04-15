@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
+import 'package:same_day_delivery_client/services/api.dart';
 import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -7,16 +9,18 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ProfileSection(),
-          MyOrder(),
-          PreviousRiders(),
-          RatedRiders(),
-          Services(),
-        ],
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ProfileSection(),
+            // MyOrder(),
+            PreviousRiders(),
+            RatedRiders(),
+            Services(),
+          ],
+        ),
       ),
     );
   }
@@ -279,14 +283,42 @@ class PreviousRiders extends StatelessWidget {
             return SizedBox(
               height: 150,
               child: ListView.builder(
-                itemCount: 1,
+                itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () async {
                       await LocalStorage.rateRider(snapshot.data![index], 5);
                     },
                     child: ListTile(
-                      title: Text(snapshot.data![index]),
+                      title: FutureBuilder(
+                        future: ApiService.getUser(snapshot.data![index]),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return const Center(
+                              child: Text("An error occurred"),
+                            );
+                          }
+                          if (snapshot.data == null) {
+                            return const Center(
+                              child: Text("No previous riders"),
+                            );
+                          }
+                          return ListTile(
+                            title: Text(
+                              snapshot.data!.userName,
+                            ),
+                            subtitle: Text(
+                              snapshot.data!.userEmail,
+                            )
+                          );
+                        },
+                      ),
                     ),
                   );
                 },
@@ -360,9 +392,38 @@ class RatedRiders extends StatelessWidget {
                             child: Text("No previous riders"),
                           );
                         }
+                        print(snapshot.data.toString());
                         return ListTile(
-                          title: Text(snapshot.data![index]),
-                          subtitle: Text(snapshots.data.toString()),
+                          title: FutureBuilder<UserModel>(
+                            future: ApiService.getUser(snapshot.data![index]),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return const Center(
+                                  child: Text("An error occurred"),
+                                );
+                              }
+                              if (snapshot.data == null) {
+                                return const Center(
+                                  child: Text("No previous riders"),
+                                );
+                              }
+                              return ListTile(
+                                title: Text(
+                                  snapshot.data!.userName,
+                                ),
+                                subtitle: Text(
+                                  snapshot.data!.userEmail,
+                                )
+                              );
+                            }
+                          ),
+                          subtitle: Text("Rating:${snapshots.data.toString()}"),
                         );
                       });
                 },

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/location_selector.dart';
@@ -363,6 +364,18 @@ class PaymentMethod extends StatefulWidget {
 }
 
 class _PaymentMethodState extends State<PaymentMethod> {
+  final config = PaymentConfig(
+    amount: 10000, // Amount should be in paisa
+    productIdentity: 'dell-g5-g5510-2021',
+    productName: 'Dell G5 G5510 2021',
+    productUrl: 'https://www.khalti.com/#/bazaar',
+    additionalData: {
+      // Not mandatory; can be used for reporting purpose
+      'vendor': 'Khalti Bazaar',
+    },
+    mobile:
+        '9800000001', // Not mandatory; can be used to fill mobile number field
+  );
   bool cashOnDeliveryChecked = false;
   bool digitalPaymentChecked = false;
 
@@ -433,6 +446,49 @@ class _PaymentMethodState extends State<PaymentMethod> {
               ),
             ]),
           ),
+        ),
+        KhaltiButton(
+          config: config,
+          preferences: [
+            // Not providing this will enable all the payment methods.
+            PaymentPreference.khalti,
+            PaymentPreference.eBanking,
+            PaymentPreference.mobileBanking,
+          ],
+          onSuccess: (successModel) {
+            // Perform Server Verification
+            showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Payment Successful'),
+      
+          actions: [
+            SimpleDialogOption(
+                child: const Text('OK'),
+                onPressed: () {
+                  setState(() {
+                  successModel.idx!;
+                  });
+
+                  Navigator.pop(context);
+                })
+          ],
+        );
+      },
+    );
+            showCustomSnackBar(context, message: "Payment successful");
+          },
+          onFailure: (failureModel) {
+            showCustomSnackBar(context,
+                message: "Payment failed", color: Colors.red);
+          },
+          onCancel: () {
+            showCustomSnackBar(context,
+                message: "Payment cancelled", color: Colors.red);
+            
+          },
+          label: "Pay With Khalti",
         ),
         // Padding(
         //   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),

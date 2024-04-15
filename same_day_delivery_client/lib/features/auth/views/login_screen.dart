@@ -4,6 +4,7 @@ import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/components/customScaffold.dart';
 import 'package:same_day_delivery_client/components/customTextField.dart';
 import 'package:same_day_delivery_client/features/auth/views/register_screen.dart';
+import 'package:same_day_delivery_client/features/rider/views/rider_only_page.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
@@ -96,25 +97,27 @@ class LoginPage extends StatelessWidget {
                         try {
                           final response = await ApiService.signInUser(
                               nameController.text, passwordController.text);
-                          print(response["success"]);
                           if (response == null) {
                             showCustomSnackBar(context,
                                 message: "Something went wrong!");
                             return;
                           }
                           if (response["success"]) {
-                            print(response["user"].runtimeType);
-                            await LocalStorage.saveUser(
-                                UserModel.fromJson(response["user"]));
-                            // UserModel logInUser =
-                            //     UserModel.fromJson(response["user"]);
-
-                            // print(logInUser.toJson());
-                            // await LocalStorage.saveUser(logInUser);
-                            response["user"]["role"] == 'rider'
-                                ? socket
-                                    .emit('riderConnected', {response["user"]})
-                                : null;
+                            if (response["user"]["role"] == "rider") {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return RiderHomePage();
+                              })
+                              );
+                              socket.emit('riderConnected', {response["user"]});
+                              showCustomSnackBar(
+                              context,
+                              message: "You are now connected as a rider!",
+                              color: Colors.green,
+                              headingText: "Success!",
+                            );
+                            return;
+                            }
                             goRouter.goNamed("home");
                             showCustomSnackBar(
                               context,
@@ -122,6 +125,7 @@ class LoginPage extends StatelessWidget {
                               color: Colors.green,
                               headingText: "Success!",
                             );
+                            return;
                           } else if (response["message"] ==
                               "Invalid Credentials") {
                             showCustomSnackBar(context,

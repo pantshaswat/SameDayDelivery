@@ -287,65 +287,81 @@ class _RiderSelectPage extends State<RiderSelectPage> {
               },
               text: const Text("Request a Ride"),
             ),
-            Expanded(
-              child: StreamBuilder(
-                stream: requestStreamSocket.getResponse,
-                builder: (BuildContext context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: SizedBox(),
-                    );
-                  }
-                  bidLists.add(snapshot.data![0]);
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: Text('No Bids'),
-                    );
-                  }
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      itemCount: bidLists.length,
-                      itemBuilder: (BuildContext context, index) {
-                        return ListTile(
-                          title: Text(bidLists[index]['riderId']),
-                          subtitle: Text(bidLists[index]['amount']),
-                          trailing: GestureDetector(
-                            onTap: () async {
-                              socket.emit('riderSelected', {
-                                "riderId": bidLists[index]['riderId'],
-                                "userId": '56789',
-                                "amount": bidLists[index]['amount'],
-                                "from": "dhulikhel",
-                                "to": "banepa"
-                              });
-
-                              await LocalStorage.saveRider(
-                                  bidLists[index]['riderId']);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: const Text(
-                                'Select ->',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    return const Center(
-                      child: Text(''),
-                    );
-                  }
-                },
-              ),
-            ),
+            RiderBids(requestStreamSocket: requestStreamSocket, bidLists: bidLists),
           ])),
         ),
+      ),
+    );
+  }
+}
+
+class RiderBids extends StatelessWidget {
+  const RiderBids({
+    super.key,
+    required this.requestStreamSocket,
+    required this.bidLists,
+  });
+
+  final StreamSocket requestStreamSocket;
+  final List bidLists;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: StreamBuilder(
+        stream: requestStreamSocket.getResponse,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: SizedBox(),
+            );
+          }
+          bidLists.add(snapshot.data![0]);
+          if (!snapshot.hasData) {
+            return const Center(
+              child: Text('No Bids'),
+            );
+          }
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: bidLists.length,
+              itemBuilder: (BuildContext context, index) {
+                return ListTile(
+                  title: Text(bidLists[index]['riderId']),
+                  subtitle: Text(bidLists[index]['amount']),
+                  trailing: GestureDetector(
+                    onTap: () async {
+                      socket.emit('riderSelected', {
+                        "riderId": bidLists[index]['riderId'],
+                        "userId": '56789',
+                        "amount": bidLists[index]['amount'],
+                        "from": "dhulikhel",
+                        "to": "banepa"
+                      });
+    
+                      await LocalStorage.saveRider(
+                          bidLists[index]['riderId']);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: const Text(
+                        'Select ->',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return const Center(
+              child: Text(''),
+            );
+          }
+        },
       ),
     );
   }
