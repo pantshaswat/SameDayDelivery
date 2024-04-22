@@ -12,6 +12,7 @@ import 'package:same_day_delivery_client/features/profile/views/profile_page.dar
 import 'package:same_day_delivery_client/features/search/page.dart';
 import 'package:same_day_delivery_client/features/socket/riderSelectPage.dart';
 import 'package:same_day_delivery_client/model/cart.item.model.dart';
+import 'package:same_day_delivery_client/model/order.model.dart';
 import 'package:same_day_delivery_client/model/product.model.dart';
 import 'package:same_day_delivery_client/services/api.dart';
 import 'package:same_day_delivery_client/services/localStorage.dart';
@@ -75,10 +76,15 @@ GoRouter goRouter = GoRouter(
                         (state.extra as Map)["startingPoint"] as GeoPoint;
                     GeoPoint endPoint =
                         (state.extra as Map)["endpoint"] as GeoPoint;
-                    print(startPoint);
+
+                    List<CartItem> orders =
+                        (state.extra as Map)["products"] as List<CartItem>;
                     return MaterialPage(
                         child: RiderSelectPage(
-                            startPoint: startPoint, endPoint: endPoint));
+                      startPoint: startPoint,
+                      endPoint: endPoint,
+                      orders: orders,
+                    ));
                   },
                 ),
               ],
@@ -102,11 +108,13 @@ GoRouter goRouter = GoRouter(
 
           return ProductPage(product: productDetails);
         }),
-    GoRoute(path: '/search/:query', builder: (context, state) {
-      print("state.extra: ${state.extra}");
-      final String query = (state.extra as Map)["query"].toString();
-      return SearchPage(searchQuery:query );
-    }),
+    GoRoute(
+        path: '/search/:query',
+        builder: (context, state) {
+          print("state.extra: ${state.extra}");
+          final String query = (state.extra as Map)["query"].toString();
+          return SearchPage(searchQuery: query);
+        }),
   ],
   //   )
   // ],

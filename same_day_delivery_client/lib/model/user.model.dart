@@ -41,7 +41,7 @@ class UserModel {
       userEmail: json['email'],
       userPassword: json['password'],
       userPhone: json['phoneNumber'],
-      userAddress: json['address'],
+      userAddress: json['address'] ?? "",
       userDate: json['date'],
       role: json['role'] ?? "user",
     );

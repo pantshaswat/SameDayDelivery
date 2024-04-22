@@ -1,4 +1,4 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const rideRecordModel = new mongoose.Schema({
     userId: {
@@ -23,7 +23,7 @@ const rideRecordModel = new mongoose.Schema({
     },
     rideDate: {
         type: Date,
-        
+
         default: Date.now,
     },
     rideStatus: {
@@ -32,20 +32,20 @@ const rideRecordModel = new mongoose.Schema({
         default: 'Pending',
         required: true,
     },
-    riderRating:{
+    riderRating: {
         type: Number,
-        
+
     },
-    userRating:{
+    userRating: {
         type: Number
     },
-    riderReview:{
+    riderReview: {
         type: String,
     },
-    userReview:{
+    userReview: {
         type: String
     }
-    
+
 });
 
 const RideRecord = mongoose.model("RideRecord", rideRecordModel);

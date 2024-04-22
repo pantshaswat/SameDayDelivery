@@ -304,7 +304,7 @@ class _ItemsCheckoutState extends State<ItemsCheckout> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Delivery Price: Rs. $deliveryPrice",
+                  "Delivery Price (estimated): Rs. $deliveryPrice",
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color.fromARGB(255, 150, 150, 150),

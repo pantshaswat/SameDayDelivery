@@ -3,24 +3,26 @@ const RideRecord = require("../model/rideRecord");
 const userModel = require('../model/user.model');
 const ObjectId = require("mongoose").Types.ObjectId;
 
-exports.rideRecordFromSocket = async (req,res) => {
-    const body = req.body;
+exports.rideRecordFromSocket = async (body, socket) => {
+    // const body = req.body;
+    console.log("Ride Record from socket " + body);
 
-    if (!(body.userId && body.riderId && body.from && body.to && body.finalBid)) {
-        return res.status(401).send('All fields required');
-    }
+    // if (!(body.userId && body.riderId && body.from && body.to && body.finalBid)) {
+    //     return res.status(401).send('All fields required');
+    // }
     try {
         const ride = await RideRecord.create({
-            userId: body.userId,
-            riderId: body.riderId,
-            from: body.from,
-            to: body.to,
-            finalBid: body.finalBid,
+            userId: body.userId ?? null,
+            riderId: body.riderId ?? null,
+            from: body.from ?? null,
+            to: body.to ?? null,
+            finalBid: body.finalBid ?? null,
             rideStatus: 'Pending',
         })
-        return res.status(201).send('ride created');
+        socket.emit('success', body);
+
     } catch (e) {
-        return res.status(500).send(e);
+        return socket.emit('error', e);
     }
 }
 exports.addRideRecord = async (req, res) => {

@@ -1,14 +1,7 @@
-
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:same_day_delivery_client/components/customButton.dart';
-import 'package:same_day_delivery_client/features/socket/biddingPage.dart';
-import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
 import 'package:same_day_delivery_client/services/listenRideRequest.dart';
-import 'package:same_day_delivery_client/services/localStorage.dart';
 import 'package:khalti_flutter/khalti_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -22,7 +15,7 @@ void main() {
     navigatorKey: navigator,
     builder: (context, _) {
       return const MaterialApp(
-        supportedLocales:  [
+        supportedLocales: [
           Locale('en', 'US'),
           Locale('ne', 'NP'),
         ],
@@ -50,25 +43,39 @@ class MyApp extends StatelessWidget {
     listenRideRequest(parentContext);
     socket.onAny((event, data) => print(event));
     socket.on(
-        "success",
+        "success-accepted",
         (data) => {
               showDialog(
                   context: parentContext,
                   builder: (parentContext) {
-                    return Center(
-                      child: SizedBox(
-                          height: 400,
-                          width: 400,
-                          child: Text(data[0].toString())),
+                    return Scaffold(
+                      body: Center(
+                        child: SizedBox(
+                            height: 400,
+                            width: 400,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                    "You have been selected for the Ride ! Ride Accepted"),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(parentContext);
+                                  },
+                                  child: Text("Close"),
+                                ),
+                              ],
+                            )),
+                      ),
                     );
                   }),
             });
 
     return MaterialApp.router(
-      supportedLocales:  [
-          Locale('en', 'US'),
-          Locale('ne', 'NP'),
-        ],
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('ne', 'NP'),
+      ],
       localizationsDelegates: [
         KhaltiLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

@@ -63,7 +63,7 @@ class _BiddingPageState extends State<BiddingPage> {
                   "userId": '56789',
                 });
               },
-              child: Text('Send Bid'))
+              child: const Text('Send Bid'))
         ]),
       ),
     ));

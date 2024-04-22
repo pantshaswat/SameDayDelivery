@@ -2,6 +2,10 @@ const socketIO = require('socket.io');
 const rideController = require('../controller/rideController')
 function initializeSocketIO(server) {
     const io = socketIO(server, {
+        cors: {
+            origin: ["http://localhost:5173", "http://127.0.0.1:5500", "http://192.168.18.47:3000"],
+            credentials: true,
+        },
         connectionStateRecovery: {}
     });
     var riderId = {};
@@ -14,6 +18,7 @@ function initializeSocketIO(server) {
         //their mongodb _id is sent from frontend
         //storing _id:socket.io in a object
         socket.on('riderConnected', (rider) => {
+            console.log(rider);
             // riderId[id.riderId] = socket.rider;
             // console.log(`rider connected ${id.riderId}`)
             riderId[rider._id] = socket.id;
@@ -49,7 +54,7 @@ function initializeSocketIO(server) {
         //now user will select a rider
         socket.on('riderSelected', async (rider) => {
             //from the riderId object, find the rider 
-            console.log(rider);
+            console.log("Rider:" + rider);
             const id = rider['riderId'];
 
             await rideController.rideRecordFromSocket({
@@ -58,9 +63,9 @@ function initializeSocketIO(server) {
                 from: rider.from,
                 to: rider.to,
                 finalBid: rider.amount
-            })
+            }, socket)
             //.to(found rider socket id)
-            socket.to(riderId[id]).emit('success', rider);
+            socket.to(riderId[id]).emit('success-accepted', rider);
             //handle this in frontend
         })
 

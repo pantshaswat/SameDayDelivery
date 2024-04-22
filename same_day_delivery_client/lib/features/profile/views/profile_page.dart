@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:same_day_delivery_client/features/auth/views/login_screen.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/routes.dart';
 import 'package:same_day_delivery_client/services/api.dart';
@@ -11,15 +12,26 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ProfileSection(),
-            // MyOrder(),
-            PreviousRiders(),
-            RatedRiders(),
-            Services(),
-          ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ProfileSection(),
+              MyOrder(),
+              SizedBox(
+                  height: 200,
+                  child: PageView(
+                    children: [
+                      const PreviousRiders(),
+                      const RatedRiders(),
+                    ],
+                  )),
+              Services(),
+            ],
+          ),
         ),
       ),
     );
@@ -31,48 +43,78 @@ class ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 230,
-      width: double.infinity,
-      color: Color.fromARGB(255, 240, 239, 239),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
-        child: Row(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Person name",
-                  style: TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[800],
-                  ),
+    return FutureBuilder(
+        future: LocalStorage.getUser(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text("An error occurred"),
+            );
+          }
+          if (snapshot.data == null) {
+            // goRouter.go('/login');
+            return const Center(
+              child: Text("No user found"),
+            );
+          }
+          if (snapshot.hasData) {
+            return Container(
+              height: 230,
+              width: double.infinity,
+              color: const Color.fromARGB(255, 240, 239, 239),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
+                child: Row(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          snapshot.data!.userName,
+                          style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        Text(
+                          snapshot.data!.userEmail,
+                          style: const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromARGB(255, 82, 82, 82),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          snapshot.data!.userPhone.isNotEmpty
+                              ? snapshot.data!.userPhone[0]
+                              : "",
+                        )
+                      ],
+                    ),
+                    const Spacer(),
+                  ],
                 ),
-                Text(
-                  "example@gmail.com",
-                  style: TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: const Color.fromARGB(255, 82, 82, 82),
-                  ),
-                ),
-              ],
-            ),
-            Spacer(),
-            Icon(
-              Icons.settings,
-              size: 28,
-              color: const Color.fromARGB(255, 113, 113, 113),
-            )
-          ],
-        ),
-      ),
-    );
+              ),
+            );
+          }
+
+          return const Center(
+            child: Text("No user found"),
+          );
+        });
   }
 }
 
@@ -95,40 +137,92 @@ class MyOrder extends StatelessWidget {
               color: Colors.grey[800],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                OrderStatus(
-                    icon: Icons.pending_actions,
-                    label: 'Pending',
-                    onPressed: () {}),
-                SizedBox(
-                  width: 17,
-                ),
-                OrderStatus(
-                    icon: Icons.folder, label: 'Processing', onPressed: () {}),
-                SizedBox(
-                  width: 17,
-                ),
-                OrderStatus(
-                    icon: Icons.fire_truck, label: 'Shipped', onPressed: () {}),
-                SizedBox(
-                  width: 17,
-                ),
-                OrderStatus(
-                    icon: Icons.reviews, label: 'Review', onPressed: () {}),
-                SizedBox(
-                  width: 17,
-                ),
-                OrderStatus(
-                    icon: Icons.file_copy, label: 'Preorder', onPressed: () {})
-              ],
-            ),
-          )
+
+          FutureBuilder(
+              future: LocalStorage.getUser(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("An error occurred"),
+                  );
+                }
+                if (snapshot.data == null) {
+                  return const Center(
+                    child: Text("No user found"),
+                  );
+                }
+                return FutureBuilder(
+                    future:
+                        ApiService.getOrders(userId: snapshot.data!.userId!),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        print(snapshot.error);
+                        return const Center(
+                          child: Text("An error occurred"),
+                        );
+                      }
+                      if (snapshot.data == null) {
+                        return const Center(
+                          child: Text("No orders found"),
+                        );
+                      }
+                      return SizedBox(
+                        height: 150,
+                        child: ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                snapshot.data![index].orderDescription,
+                              ),
+                              subtitle: Text(
+                                snapshot.data![index].orderStatus,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    });
+              }),
+          // SingleChildScrollView(
+          //   scrollDirection: Axis.horizontal,
+          //   child: Row(
+          //     children: [
+          //       OrderStatus(
+          //           icon: Icons.pending_actions,
+          //           label: 'Pending',
+          //           onPressed: () {}),
+          //       const SizedBox(
+          //         width: 17,
+          //       ),
+          //       OrderStatus(
+          //           icon: Icons.folder, label: 'Processing', onPressed: () {}),
+          //       const SizedBox(
+          //         width: 17,
+          //       ),
+          //       OrderStatus(
+          //           icon: Icons.fire_truck, label: 'Pending', onPressed: () {}),
+          //       const SizedBox(
+          //         width: 17,
+          //       ),
+          //       OrderStatus(
+          //           icon: Icons.file_copy, label: 'Delivered', onPressed: () {})
+          //     ],
+          //   ),
+          // )
         ],
       ),
     );
@@ -156,9 +250,9 @@ class OrderStatus extends StatelessWidget {
           Icon(
             icon,
             size: 28,
-            color: Color.fromARGB(255, 82, 82, 82),
+            color: const Color.fromARGB(255, 82, 82, 82),
           ),
-          SizedBox(
+          const SizedBox(
             height: 8,
           ),
           Text(label)
@@ -204,7 +298,7 @@ class Services extends StatelessWidget {
             ),
             Expanded(
               child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(),
+                separatorBuilder: (context, index) => const Divider(),
                 itemCount: services.length,
                 itemBuilder: (context, index) {
                   return ServiceTile(
@@ -305,18 +399,15 @@ class PreviousRiders extends StatelessWidget {
                             );
                           }
                           if (snapshot.data == null) {
-                            return const Center(
-                              child: Text("No previous riders"),
-                            );
+                            return Container();
                           }
                           return ListTile(
-                            title: Text(
-                              snapshot.data!.userName,
-                            ),
-                            subtitle: Text(
-                              snapshot.data!.userEmail,
-                            )
-                          );
+                              title: Text(
+                                snapshot.data!.userName,
+                              ),
+                              subtitle: Text(
+                                snapshot.data!.userEmail,
+                              ));
                         },
                       ),
                     ),
@@ -395,34 +486,32 @@ class RatedRiders extends StatelessWidget {
                         print(snapshot.data.toString());
                         return ListTile(
                           title: FutureBuilder<UserModel>(
-                            future: ApiService.getUser(snapshot.data![index]),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return const Center(
-                                  child: Text("An error occurred"),
-                                );
-                              }
-                              if (snapshot.data == null) {
-                                return const Center(
-                                  child: Text("No previous riders"),
-                                );
-                              }
-                              return ListTile(
-                                title: Text(
-                                  snapshot.data!.userName,
-                                ),
-                                subtitle: Text(
-                                  snapshot.data!.userEmail,
-                                )
-                              );
-                            }
-                          ),
+                              future: ApiService.getUser(snapshot.data![index]),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                if (snapshot.hasError) {
+                                  return const Center(
+                                    child: Text("An error occurred"),
+                                  );
+                                }
+                                if (snapshot.data == null) {
+                                  return const Center(
+                                    child: Text("No previous riders"),
+                                  );
+                                }
+                                return ListTile(
+                                    title: Text(
+                                      snapshot.data!.userName,
+                                    ),
+                                    subtitle: Text(
+                                      snapshot.data!.userEmail,
+                                    ));
+                              }),
                           subtitle: Text("Rating:${snapshots.data.toString()}"),
                         );
                       });

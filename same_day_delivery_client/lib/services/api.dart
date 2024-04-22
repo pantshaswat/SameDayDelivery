@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:same_day_delivery_client/model/order.model.dart';
 import 'package:same_day_delivery_client/model/product.model.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
 import 'package:same_day_delivery_client/services/extractToken.dart';
@@ -11,7 +12,7 @@ import 'package:same_day_delivery_client/services/localStorage.dart';
 
 class ApiService {
   static final CookieJar cookieJar = CookieJar();
-  static const String _baseUrl = "http://192.168.12.73:3000/";
+  static const String _baseUrl = "http://192.168.18.47:3000/";
   get baseUrl => _baseUrl;
   static final Dio dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
@@ -40,14 +41,17 @@ class ApiService {
       );
       List<Cookie> cookies =
           await cookieJar.loadForRequest(Uri.parse(_baseUrl));
-      final token = extractAndProcessToken(cookies.toString());
-      if (token != null) {
-        await LocalStorage.saveToken(token);
-      }
+      // final token = extractAndProcessToken(cookies.toString());
+      // if (token != null) {
+      //   await LocalStorage.saveToken(token);
+      // }
       final responseData = jsonDecode(response.data);
-      print(responseData);
+      // print(responseData);
 
       final userType = responseData["user"]["role"] ?? "user";
+      await LocalStorage.saveUser(UserModel.fromJson(responseData["user"]));
+      final user = await LocalStorage.getUser();
+      print("Logged in as ${user?.toString()}");
       // await LocalStorage.saveUserType(userType);
       // await LocalStorage.saveUser(UserModel.fromJson(responseData["user"]));
       return responseData;
@@ -102,6 +106,7 @@ class ApiService {
       }
       return products;
     } catch (e) {
+      print(e.toString());
       rethrow;
     }
   }
@@ -139,6 +144,49 @@ class ApiService {
         products.add(ProductModel.fromJson(product));
       }
       return products;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<void> orderProduct(Order order) async {
+    try {
+      final token = await LocalStorage.getToken();
+      final Response response = await dio.post("/order/create",
+          data: order.toJson(),
+          options: Options(
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            responseType: ResponseType.plain,
+          ));
+      final responseData = jsonDecode(response.data);
+      print(responseData);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<List<Order>> getOrders({required String userId}) async {
+    try {
+      final token = await LocalStorage.getToken();
+      final Response response = await dio.get("/order/getUserOrder?id=$userId",
+          options: Options(
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            responseType: ResponseType.plain,
+          ));
+      final responseData = jsonDecode(response.data);
+      List<Order> orders = [];
+      for (var order in responseData) {
+        orders.add(Order.fromJson(order));
+      }
+      return orders;
     } catch (e) {
       rethrow;
     }

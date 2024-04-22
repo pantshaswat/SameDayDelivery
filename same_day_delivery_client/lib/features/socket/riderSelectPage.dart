@@ -1,18 +1,25 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:same_day_delivery_client/components/customButton.dart';
 import 'package:same_day_delivery_client/features/socket/socketConnection.dart';
+import 'package:same_day_delivery_client/model/cart.item.model.dart';
+import 'package:same_day_delivery_client/model/order.model.dart';
 import 'package:same_day_delivery_client/model/user.model.dart';
+import 'package:same_day_delivery_client/services/api.dart';
 import 'package:same_day_delivery_client/services/localStorage.dart';
 import 'package:same_day_delivery_client/services/location.dart';
 
 class RiderSelectPage extends StatefulWidget {
   final GeoPoint startPoint;
   final GeoPoint endPoint;
+  final List<CartItem> orders;
   const RiderSelectPage({
     super.key,
     required this.startPoint,
     required this.endPoint,
+    required this.orders,
   });
 
   @override
@@ -72,21 +79,6 @@ class _RiderSelectPage extends State<RiderSelectPage> {
     });
 
     return Scaffold(
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () async {
-      //     RoadInfo roadInfo = await controller.drawRoad(
-      //       widget.startPoint,
-      //       widget.endPoint,
-      //       roadType: RoadType.car,
-      //       roadOption: RoadOption(
-      //         roadWidth: 10,
-      //         roadColor: Colors.blue,
-      //         zoomInto: true,
-      //       ),
-      //     );
-      //   },
-      //   child: const Icon(Icons.arrow_back),
-      // ),
       appBar: AppBar(
           title: const Text('Delivery Page'),
           leading: IconButton(
@@ -145,7 +137,7 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Order No.",
+                    Text("Order No. ${point1.hashCode}",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -247,28 +239,28 @@ class _RiderSelectPage extends State<RiderSelectPage> {
               ],
             ),
             // Spacer(),
-            FutureBuilder(
-                future: LocalStorage.getUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CustomButton(text: "Loading...", onPressed: () {});
-                  }
+            // FutureBuilder(
+            //     future: LocalStorage.getUser(),
+            //     builder: (context, snapshot) {
+            //       if (snapshot.connectionState == ConnectionState.waiting) {
+            //         return CustomButton(text: "Loading...", onPressed: () {});
+            //       }
 
-                  return CustomButton(
-                      onPressed: () async {
-                        // final UserModel? user = await LocalStorage.getUser();
-                        final id = snapshot.data!.userId;
-                        socket.emit(
-                          'riderConnected',
-                          {
-                            "_id": id,
-                            "name": "Shaswat",
-                            "riderId": "12345",
-                          },
-                        );
-                      },
-                      text: Text("Be a Rider"));
-                }),
+            //       return CustomButton(
+            //           onPressed: () async {
+            //             // final UserModel? user = await LocalStorage.getUser();
+            //             final id = snapshot.data!.userId;
+            //             socket.emit(
+            //               'riderConnected',
+            //               {
+            //                 "_id": id,
+            //                 "name": "Shaswat",
+            //                 "riderId": "12345",
+            //               },
+            //             );
+            //           },
+            //           text: Text("Be a Rider"));
+            //     }),
             const SizedBox(
               height: 10,
             ),
@@ -277,17 +269,25 @@ class _RiderSelectPage extends State<RiderSelectPage> {
                 //check if mounted
 
                 final UserModel? user = await LocalStorage.getUser();
+                final distance =
+                    await distance2point(widget.startPoint, widget.endPoint);
                 await LocalStorage.saveRider(user!.userId!);
                 socket.emit('requestRide', {
-                  'userId': user!.userId,
-                  'startingPoint': 'dhulikhel',
-                  'endingPoint': 'banepa',
-                  'amount': '100'
+                  'userId': user.userId,
+                  'startingPoint': widget.startPoint.toString(),
+                  'endingPoint': widget.endPoint.toString(),
+                  'amount': (distance * 10).toString(),
                 });
               },
               text: const Text("Request a Ride"),
             ),
-            RiderBids(requestStreamSocket: requestStreamSocket, bidLists: bidLists),
+            RiderBids(
+              requestStreamSocket: requestStreamSocket,
+              bidLists: bidLists,
+              orders: widget.orders,
+              location1: widget.startPoint,
+              location2: widget.endPoint,
+            ),
           ])),
         ),
       ),
@@ -300,10 +300,16 @@ class RiderBids extends StatelessWidget {
     super.key,
     required this.requestStreamSocket,
     required this.bidLists,
+    required this.orders,
+    required this.location1,
+    required this.location2,
   });
 
   final StreamSocket requestStreamSocket;
   final List bidLists;
+  final List<CartItem> orders;
+  final GeoPoint location1;
+  final GeoPoint location2;
 
   @override
   Widget build(BuildContext context) {
@@ -331,16 +337,35 @@ class RiderBids extends StatelessWidget {
                   subtitle: Text(bidLists[index]['amount']),
                   trailing: GestureDetector(
                     onTap: () async {
+                      final user = await LocalStorage.getUser();
                       socket.emit('riderSelected', {
                         "riderId": bidLists[index]['riderId'],
-                        "userId": '56789',
+                        "userId": user!.userId,
                         "amount": bidLists[index]['amount'],
-                        "from": "dhulikhel",
-                        "to": "banepa"
+                        "from": "Location 1 ",
+                        "to": "Location 2"
                       });
-    
-                      await LocalStorage.saveRider(
-                          bidLists[index]['riderId']);
+                      Order order = Order(
+                        orderId: Random().nextInt(100000).toString(),
+                        userId: user.userId!,
+                        riderId: bidLists[index]['riderId'],
+                        orderAddress: location1.toString(),
+                        serviceId:
+                            "60d3b41c8534a2c6f49e6a33", //to be changed later
+                        orderStatus: "pending",
+                        orderDate: DateTime.now().toString(),
+                        orderAmount: 1000,
+                        orderDescription: orders[0].title,
+                        orderEndingPoint: location2.toString(),
+                        orderStartingPoint: location1.toString(),
+                        orderCompletionDate: '2024-04-22',
+                        orderInitiateDate: '2024-04-20',
+                        deliveryCharge: 1000,
+                      );
+
+                      await ApiService.orderProduct(order);
+
+                      await LocalStorage.saveRider(bidLists[index]['riderId']);
                     },
                     child: Container(
                       padding: const EdgeInsets.all(10),

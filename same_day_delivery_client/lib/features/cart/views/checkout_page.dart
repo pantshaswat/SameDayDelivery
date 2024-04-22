@@ -20,20 +20,6 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   GeoPoint? pickedLocation;
-  // final List<Map<String, dynamic>> checkOutItems = [
-  //   {
-  //     "productName": "Running Shoes",
-  //     "shopName": "Sports Emporium",
-  //     "price": 700,
-  //     "quantity": 2,
-  //   },
-  //   {
-  //     "productName": "Wireless Earbuds",
-  //     "shopName": "Gadget Hub",
-  //     "price": 400,
-  //     "quantity": 1,
-  //   },
-  // ];
 
   String selectedPaymentMethod = '';
 
@@ -77,6 +63,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 color: const Color.fromARGB(255, 240, 239, 239),
                 child: PlaceOrder(
                   pickedLocation: pickedLocation,
+                  cartItems: widget.cartItems,
                 ))
           ],
         ),
@@ -458,25 +445,24 @@ class _PaymentMethodState extends State<PaymentMethod> {
           onSuccess: (successModel) {
             // Perform Server Verification
             showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Payment Successful'),
-      
-          actions: [
-            SimpleDialogOption(
-                child: const Text('OK'),
-                onPressed: () {
-                  setState(() {
-                  successModel.idx!;
-                  });
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Payment Successful'),
+                  actions: [
+                    SimpleDialogOption(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          setState(() {
+                            successModel.idx!;
+                          });
 
-                  Navigator.pop(context);
-                })
-          ],
-        );
-      },
-    );
+                          Navigator.pop(context);
+                        })
+                  ],
+                );
+              },
+            );
             showCustomSnackBar(context, message: "Payment successful");
           },
           onFailure: (failureModel) {
@@ -486,7 +472,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
           onCancel: () {
             showCustomSnackBar(context,
                 message: "Payment cancelled", color: Colors.red);
-            
           },
           label: "Pay With Khalti",
         ),
@@ -603,10 +588,12 @@ class PriceList extends StatelessWidget {
 
 class PlaceOrder extends StatefulWidget {
   GeoPoint? pickedLocation;
+  List<CartItem> cartItems;
 
   PlaceOrder({
     super.key,
     required this.pickedLocation,
+    required this.cartItems,
   });
 
   @override
@@ -621,6 +608,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.cartItems[0].id);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
@@ -648,6 +636,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
             child: CustomButton(
                 onPressed: () async {
                   final currentPosition = await LocationService().getLocation();
+
                   if (widget.pickedLocation == null) {
                     // ScaffoldMessenger.of(context).showSnackBar(
                     //   const SnackBar(
@@ -663,7 +652,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
                     "startingPoint": GeoPoint(
                       latitude: currentPosition.latitude,
                       longitude: currentPosition.longitude,
-                    )
+                    ),
+                    "products": widget.cartItems,
                   });
                 },
                 text: Text(

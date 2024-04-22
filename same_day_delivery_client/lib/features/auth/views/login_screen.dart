@@ -35,30 +35,6 @@ class LoginPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    // Stack(
-                    //   children: [
-                    //     SizedBox(
-                    //       height: 150,
-                    //       width: double.infinity,
-                    //       child: Image.network(
-                    //         imageURL,
-                    //         fit: BoxFit.fill,
-                    //       ),
-                    //     ),
-                    //     const Positioned(
-                    //       top: 30,
-                    //       left: 20,
-                    //       child: Text(
-                    //         'Same Day Delivery',
-                    //         style: TextStyle(
-                    //           color: Colors.black,
-                    //           fontSize: 24,
-                    //           fontWeight: FontWeight.bold,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     const SizedBox(height: 150),
                     const Text(
                       'Login',
@@ -107,17 +83,17 @@ class LoginPage extends StatelessWidget {
                               Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return RiderHomePage();
-                              })
-                              );
+                              }));
                               socket.emit('riderConnected', {response["user"]});
                               showCustomSnackBar(
-                              context,
-                              message: "You are now connected as a rider!",
-                              color: Colors.green,
-                              headingText: "Success!",
-                            );
-                            return;
+                                context,
+                                message: "You are now connected as a rider!",
+                                color: Colors.green,
+                                headingText: "Success!",
+                              );
+                              return;
                             }
+                            // await LocalStorage.saveUser(response["user"]);
                             goRouter.goNamed("home");
                             showCustomSnackBar(
                               context,
@@ -138,6 +114,7 @@ class LoginPage extends StatelessWidget {
                             );
                           }
                         } catch (e) {
+                          rethrow;
                           if (e is DioException &&
                               e.response!.statusCode == 400) {
                             showCustomSnackBar(context,

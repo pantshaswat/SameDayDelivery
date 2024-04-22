@@ -96,6 +96,8 @@ class LocalStorage {
   static Future<void> saveUser(UserModel user) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('user', user.toJsonString());
+    print("user: ${user.toJsonString()}");
+    return;
   }
 
   static Future<UserModel?> getUser() async {
@@ -111,6 +113,7 @@ class LocalStorage {
   static Future<void> removeUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('user');
+    return;
   }
 
   static Future<void> saveRider(String riderId) async {
@@ -120,6 +123,7 @@ class LocalStorage {
       riders.add(riderId);
     }
     prefs.setStringList('riders', riders);
+    return;
   }
 
   static Future<List<String>?> getRider() async {
@@ -130,6 +134,7 @@ class LocalStorage {
   static Future<void> rateRider(String riderId, double rating) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("rider-$riderId", rating.toString());
+    return;
   }
 
   static Future<double?> getRiderRating(String riderId) async {

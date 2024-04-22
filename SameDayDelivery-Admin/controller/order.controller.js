@@ -15,6 +15,8 @@ exports.createOrder = async (req, res) => {
       delivery_charge,
     } = req.body;
 
+    console.log(req.body);
+
     const order = await Order.create({
       user_id,
       service_id,
@@ -28,12 +30,32 @@ exports.createOrder = async (req, res) => {
       delivery_charge,
     });
 
-    res.status(201).json(order);
+    await order.save();
+
+    return res.status(201).json(order);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 };
+exports.getUserOrder = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const orders = await Order.find({
+      user_id: id,
+    });
+
+    if (!orders) {
+      return res.status(404).send("No orders found");
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+}
+
 
 exports.getOrder = async (req, res) => {
   try {
